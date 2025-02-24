@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scentova - Order History</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+
+        .dashboard {
+            display: flex;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #1e3a8a, #0f2c6d);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000; /* Ensure sidebar is above other content */
+            left: 0;
+            top: 0;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar ul li {
+            margin: 0;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 12px 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar ul li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .sidebar ul li a i {
+            font-size: 18px;
+        }
+
+        .sidebar img {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            margin: 0 auto 20px;
+            display: block;
+            border-radius: 10px;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            margin-left: 270px; /* Match sidebar width + extra spacing */
+            max-width: calc(100% - 270px); /* Prevent overflow */
+            box-sizing: border-box; /* Include padding in width calculation */
+        }
+
+        /* Header Styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: linear-gradient(90deg, #1e3a8a, #0f2c6d);
+            padding: 20px 30px;
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .add-to-cart-icon {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .add-to-cart-icon i {
+            font-size: 28px;
+            color: white;
+        }
+
+        .add-to-cart-icon .cart-count {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #ff4757;
+            color: white;
+            border-radius: 50%;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+
+        /* Order History Styles */
+        .order-history-title {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+        }
+
+        .order-item {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+            width: 100%;
+        }
+
+        .order-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-item h3 {
+            margin: 0 0 15px 0;
+            font-size: 20px;
+            color: #1e3a8a;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .order-item p {
+            margin: 10px 0;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .order-item .order-items {
+            background-color: #f9f9f9;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .order-amount {
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+
+        /* No Orders Styling */
+        .no-orders {
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .no-orders i {
+            font-size: 48px;
+            color: #ccc;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .no-orders p {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .no-orders button {
+            background: linear-gradient(90deg, #1e3a8a, #0f2c6d);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Loading Indicator */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-weight: bold;
+            color: #1e3a8a;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>SCENTOVA</h2>
+            <img src="{{ url_for('static', filename='scent-logo-new.png') }}" alt="Scentova Logo" class="sidebar-image">
+            <ul>
+                <li><a href="{{ url_for('home') }}"><i class="fas fa-home"></i>Home</a></li>
+                <li><a href="{{ url_for('cart') }}"><i class="fas fa-shopping-cart"></i>Cart</a></li>
+                <li><a href="{{ url_for('order_history_page') }}" class="active"><i class="fas fa-history"></i>Order History</a></li>
+                <li><a href="{{ url_for('profile') }}"><i class="fas fa-user"></i>Profile</a></li>
+                <li><a href="{{ url_for('feedback') }}"><i class="fas fa-comment"></i>Feedback</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header>
+                <h1>Order History</h1>
+                <div class="add-to-cart-icon" onclick="navigateToCart()">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </div>
+            </header>
+
+            <!-- Order History Content -->
+            <h2 class="order-history-title">Your Orders</h2>
+            <div id="loading" class="loading">Loading your order history...</div>
+            <div id="orderHistoryContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        const user_id = 1; // Replace with actual user ID
+
+        // Function to navigate to cart
+        function navigateToCart() {
+            window.location.href = "/cart";
+        }
+
+        // Function to navigate to home
+        function navigateToHome() {
+            window.location.href = "/";
+        }
+
+        // Format date for display
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        }
+
+        // Fetch cart count
+        function fetchCartCount() {
+            fetch(`/api/cart-count?user_id=${user_id}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("cartCount").textContent = data.count;
+                })
+                .catch(error => console.error("Error fetching cart count:", error));
+        }
+
+        // Load order history
+        function loadOrderHistory() {
+            const loadingIndicator = document.getElementById("loading");
+            loadingIndicator.style.display = "block";
+
+            fetch(`/api/order-history?user_id=${user_id}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(orders => {
+                    loadingIndicator.style.display = "none";
+                    const container = document.getElementById("orderHistoryContainer");
+
+                    if (orders.length === 0) {
+                        container.innerHTML = `
+                            <div class="no-orders">
+                                <i class="fas fa-shopping-bag"></i>
+                                <p>You haven't placed any orders yet.</p>
+                                <button onclick="navigateToHome()">Shop Now</button>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    let ordersHTML = "";
+                    orders.forEach(order => {
+                        ordersHTML += `
+                            <div class="order-item">
+                                <h3>Order #${order.order_id}</h3>
+                                <p><strong>Date:</strong> ${formatDate(order.order_date)}</p>
+                                <p><strong>Shipping Address:</strong> ${order.shipping_address}</p>
+                                <p><strong>Payment Method:</strong> ${order.payment_method}</p>
+                                <p><strong>Items:</strong></p>
+                                <div class="order-items">
+                                    ${order.items}
+                                </div>
+                                <p class="order-amount">Total Amount: $${order.total_amount.toFixed(2)}</p>
+                            </div>
+                        `;
+                    });
+
+                    container.innerHTML = ordersHTML;
+                })
+                .catch(error => {
+                    console.error("Error loading order history:", error);
+                    loadingIndicator.style.display = "none";
+                    document.getElementById("orderHistoryContainer").innerHTML = `
+                        <div class="no-orders">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>There was an error loading your order history. Please try again later.</p>
+                            <button onclick="loadOrderHistory()">Try Again</button>
+                        </div>
+                    `;
+                });
+        }
+
+        // Initialize
+        document.addEventListener("DOMContentLoaded", function() {
+            fetchCartCount();
+            loadOrderHistory();
+        });
+    </script>
+</body>
+</html>
