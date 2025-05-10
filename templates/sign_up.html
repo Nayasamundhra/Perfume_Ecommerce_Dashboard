@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup Page</title>
+    <link rel="icon" href="{{ url_for('static', filename='assets/ini.png') }}" type="image/x-icon" />
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url("{{ url_for('static', filename='assets/5.jpeg') }}");
+            background-repeat: no-repeat;
+            background-size: cover;
+            font-family: sans-serif;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            width: 80%;
+            max-width: 1200px; 
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .perfume-image {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .perfume-image img {
+            width: auto;
+            max-height: 50%;
+            max-width: 80%;
+            display: block;
+            margin: 0 auto;
+            object-fit: contain;
+        }
+
+        .login-form {
+            flex: 1;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 0 10px 10px 0; 
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="email"], 
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            background-color: #4285f4;
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #e0a800;
+        }
+
+        .google-login {
+            margin-top: 20px;
+        }
+
+        .google-btn {
+            background-color: #4285f4; 
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        .google-btn:hover {
+            background-color: #357ae8;
+        }
+
+        .error {
+            color: red;
+            font-size: 0.8em;
+            margin-top: 5px;
+            display: none;
+        }
+
+        input.invalid {
+            border-color: red;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 90%;
+                height: auto; 
+            }
+
+            .perfume-image {
+                width: 100%;
+                max-height: 25vh; 
+                margin-bottom: 20px;
+                border-radius: 10px 10px 0 0; 
+            }
+
+            .perfume-image img {
+                max-width: 80%;
+                max-height: 100%;
+            }
+
+            .login-form {
+                border-radius: 0 0 10px 10px; 
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="perfume-image">
+            <img src="{{ url_for('static', filename='assets/scentova-img.png') }}" alt="Scentova Logo">
+        </div>
+        <div class="login-form">
+            <h1>Signup</h1> 
+            <form id="signupForm" autocomplete="new-password">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" autocomplete="new-password" required>
+                    <div id="nameError" class="error">Name must be between 3 and 50 characters.</div>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" autocomplete="new-password" required>
+                    <div id="emailError" class="error">Please enter a valid email address.</div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" autocomplete="new-password" required>
+                    <div id="passwordError" class="error">Password must be at least 8 characters, include uppercase, lowercase, number and special character.</div>
+                </div>
+                <a href="{{ url_for('customer_home') }}"><button type="submit" class="btn">Sign Up</button></a>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('signupForm');
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            
+            const nameError = document.getElementById('nameError');
+            const emailError = document.getElementById('emailError');
+            const passwordError = document.getElementById('passwordError');
+            
+            // Generate random field names to prevent autofill
+            const randomString = Math.random().toString(36).substring(2);
+            nameInput.name = 'name_' + randomString;
+            emailInput.name = 'email_' + randomString;
+            passwordInput.name = 'pwd_' + randomString;
+            
+            // Clear form fields immediately
+            form.reset();
+            nameInput.value = '';
+            emailInput.value = '';
+            passwordInput.value = '';
+            
+            // Delayed reset to override browser autofill
+            setTimeout(function() {
+                nameInput.value = '';
+                emailInput.value = '';
+                passwordInput.value = '';
+            }, 100);
+            
+            // Second delayed reset as backup
+            setTimeout(function() {
+                nameInput.value = '';
+                emailInput.value = '';
+                passwordInput.value = '';
+            }, 500);
+    
+            // Validation functions
+            function validateName(name) {
+                return name.trim().length >= 3 && name.trim().length <= 50;
+            }
+    
+            function validateEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+    
+            function validatePassword(password) {
+                const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+                return passwordRegex.test(password);
+            }
+    
+            // Event listeners for real-time validation
+            nameInput.addEventListener('input', function() {
+                if (validateName(nameInput.value)) {
+                    nameInput.classList.remove('invalid');
+                    nameError.style.display = 'none';
+                } else {
+                    nameInput.classList.add('invalid');
+                    nameError.style.display = 'block';
+                }
+            });
+    
+            emailInput.addEventListener('input', function() {
+                if (validateEmail(emailInput.value)) {
+                    emailInput.classList.remove('invalid');
+                    emailError.style.display = 'none';
+                } else {
+                    emailInput.classList.add('invalid');
+                    emailError.style.display = 'block';
+                }
+            });
+    
+            passwordInput.addEventListener('input', function() {
+                if (validatePassword(passwordInput.value)) {
+                    passwordInput.classList.remove('invalid');
+                    passwordError.style.display = 'none';
+                } else {
+                    passwordInput.classList.add('invalid');
+                    passwordError.style.display = 'block';
+                }
+            });
+    
+            // Form submission validation
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+    
+                let isValid = true;
+    
+                // Validate Name
+                if (!validateName(nameInput.value)) {
+                    nameInput.classList.add('invalid');
+                    nameError.style.display = 'block';
+                    isValid = false;
+                }
+    
+                // Validate Email
+                if (!validateEmail(emailInput.value)) {
+                    emailInput.classList.add('invalid');
+                    emailError.style.display = 'block';
+                    isValid = false;
+                }
+    
+                // Validate Password
+                if (!validatePassword(passwordInput.value)) {
+                    passwordInput.classList.add('invalid');
+                    passwordError.style.display = 'block';
+                    isValid = false;
+                }
+    
+                // If all validations pass, submit the form
+                if (isValid) {
+                    const formData = {
+                        name: nameInput.value,
+                        email: emailInput.value,
+                        password: passwordInput.value
+                    };
+    
+                    fetch('/sign_up', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.redirect) {
+                            window.location.href = data.redirect;
+                        } else if (data.error) {
+                            alert(data.error);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

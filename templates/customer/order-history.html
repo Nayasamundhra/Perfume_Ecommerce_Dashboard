@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scentova - Order History</title>
+    <link rel="icon" href="{{ url_for('static', filename='assets/ini.png') }}" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Your existing CSS styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+
+        .dashboard {
+            display: flex;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #1e3a8a, #0f2c6d);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000; /* Ensure sidebar is above other content */
+            left: 0;
+            top: 0;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar ul li {
+            margin: 0;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 12px 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar ul li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .sidebar ul li a i {
+            font-size: 18px;
+        }
+
+        .sidebar img {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            margin: 0 auto 20px;
+            display: block;
+            border-radius: 10px;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            margin-left: 300px; /* Match sidebar width + extra spacing */
+            max-width: calc(100% - 270px); /* Prevent overflow */
+            box-sizing: border-box; /* Include padding in width calculation */
+        }
+
+        /* Header Styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: linear-gradient(90deg, #1e3a8a, #0f2c6d);
+            padding: 20px 30px;
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .add-to-cart-icon {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .add-to-cart-icon i {
+            font-size: 28px;
+            color: white;
+        }
+
+        .add-to-cart-icon .cart-count {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #ddd239;
+            color: rgb(19, 19, 19);
+            border-radius: 50%;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+
+        /* Order History Styles */
+        .order-history-title {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+        }
+
+        .order-item {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+            width: 100%;
+        }
+
+        .order-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-item h3 {
+            margin: 0 0 15px 0;
+            font-size: 20px;
+            color: #1e3a8a;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .order-item p {
+            margin: 10px 0;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .order-item .order-items {
+            background-color: #f9f9f9;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .order-amount {
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+
+        /* No Orders Styling */
+        .no-orders {
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .no-orders i {
+            font-size: 48px;
+            color: #ccc;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .no-orders p {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .no-orders button {
+            background: linear-gradient(90deg, #1e3a8a, #0f2c6d);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Loading Indicator */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-weight: bold;
+            color: #1e3a8a;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>SCENTOVA</h2>
+            <img src="{{ url_for('static', filename='assets/scent-logo-new.png') }}" alt="Scentova Logo">
+            <ul>
+                <li><a href="{{ url_for('customer_home') }}"><i class="fas fa-home"></i>Home</a></li>
+                <li><a href="{{ url_for('customer_cart') }}"><i class="fas fa-shopping-cart"></i>Cart</a></li>
+                <li><a href="{{ url_for('customer_order_history') }}" class="active"><i class="fas fa-history"></i>Order History</a></li>
+                <li><a href="{{ url_for('customer_profile') }}"><i class="fas fa-user"></i>Profile</a></li>
+                <li><a href="{{ url_for('customer_feedback') }}"><i class="fas fa-comment"></i>Feedback</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i>Logout</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header>
+                <h1>Order History</h1>
+                <div class="add-to-cart-icon" onclick="navigateToCart()">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </div>
+            </header>
+
+            <!-- Order History Content -->
+            <h2 class="order-history-title">Your Orders</h2>
+            <div id="loading" class="loading">Loading your order history...</div>
+            <div id="orderHistoryContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        const user_id = 1; // Replace with actual user ID
+        
+        // Function to navigate to cart
+        function navigateToCart() {
+            window.location.href = "/customer/cart";
+        }
+
+        // Function to navigate to home
+        function navigateToHome() {
+            window.location.href = "/customer/home";
+        }
+
+        // Format date for display using strict local time
+        // Format the date exactly as it appears in the database but with a nicer display
+function formatDate(dateString) {
+    if (!dateString) {
+        return 'Date not available';
+    }
+    
+    // Split the database timestamp into date and time parts
+    const parts = dateString.split(' ');
+    if (parts.length !== 2) {
+        return dateString; // Return as-is if format is unexpected
+    }
+    
+    const datePart = parts[0]; // e.g., "2025-03-10"
+    const timePart = parts[1]; // e.g., "15:05:45"
+    
+    // Convert YYYY-MM-DD to more readable format
+    const [year, month, day] = datePart.split('-');
+    
+    // Create month names array
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+    
+    // Convert 24-hour time to 12-hour format with AM/PM
+    const [hours, minutes, seconds] = timePart.split(':');
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12; // Convert 0 to 12 for 12 AM
+    
+    // Format time as HH:MM:SS AM/PM
+    const formattedTime = `${hour12}:${minutes}:${seconds} ${ampm}`;
+    
+    // Return the formatted date string
+    return `${monthNames[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year} at ${formattedTime}`;
+}
+
+        // Fetch cart count
+        function fetchCartCount() {
+            fetch('/api/customer/cart-count')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("cartCount").textContent = data.count;
+                })
+                .catch(error => console.error("Error fetching cart count:", error));
+        }
+
+        // Load order history
+        function loadOrderHistory() {
+            const loadingIndicator = document.getElementById("loading");
+            loadingIndicator.style.display = "block";
+
+            // Get last username from localStorage as a backup
+            const lastUsername = localStorage.getItem('last_order_username');
+
+            fetch('/api/customer/order-history')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(orders => {
+                    loadingIndicator.style.display = "none";
+                    const container = document.getElementById("orderHistoryContainer");
+
+                    if (!orders || orders.length === 0) {
+                        container.innerHTML = `
+                            <div class="no-orders">
+                                <i class="fas fa-shopping-bag"></i>
+                                <p>You haven't placed any orders yet.</p>
+                                <button onclick="navigateToHome()">Shop Now</button>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    console.log("Orders received:", orders); // Log received data
+
+                    let ordersHTML = "";
+                    orders.forEach(order => {
+                        // Check all possible field names for customer name
+                        let customerName = order.username || order.customer_name || order.name || lastUsername || 'Unknown';
+                        
+                        // If we have data but customer name is missing, add console log to debug
+                        if (customerName === 'Unknown') {
+                            console.log("Missing customer name for order:", order);
+                        }
+                        
+                        ordersHTML += `
+                            <div class="order-item">
+                                <h3>Order #${order.order_id}</h3>
+                                <p><strong>Date:</strong> ${order.order_date ? formatDate(order.order_date) : getCurrentLocalTime()}</p>
+                                <p><strong>Status:</strong> ${order.status || 'Processing'}</p>
+                                <p><strong>Customer Name:</strong> ${customerName}</p>
+                                <p><strong>Shipping Address:</strong> ${order.shipping_address || 'Not provided'}</p>
+                                <p><strong>Payment Method:</strong> ${order.payment_method || 'Not specified'}</p>
+                                <p><strong>Product:</strong> ${order.product_name || 'Multiple items'}</p>
+                                <p><strong>Quantity:</strong> ${order.quantity || '1'}</p>
+                                <p class="order-amount">Total Amount: $${parseFloat(order.total_amt || 0).toFixed(2)}</p>
+                            </div>
+                        `;
+                    });
+
+                    container.innerHTML = ordersHTML;
+                })
+                .catch(error => {
+                    console.error("Error loading order history:", error);
+                    loadingIndicator.style.display = "none";
+                    document.getElementById("orderHistoryContainer").innerHTML = `
+                        <div class="no-orders">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>There was an error loading your order history. Please try again later.</p>
+                            <button onclick="loadOrderHistory()">Try Again</button>
+                        </div>
+                    `;
+                });
+        }
+
+        // Initialize
+        document.addEventListener("DOMContentLoaded", function() {
+            fetchCartCount();
+            loadOrderHistory();
+        });
+    </script>
+</body>
+</html>

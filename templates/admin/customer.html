@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Management | Scentova Admin</title>
+    <link rel="icon" href="ini.png" type="image/x-icon" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+
+        .dashboard {
+            display: flex;
+        }
+        h2{
+            color: #1e3a8a;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #1e3a8a;
+            color: white;
+            height: 100vh; /* Makes the sidebar stretch to full viewport height */
+            position: fixed;
+            padding: 20px;
+            display: flex;
+            overflow-y: auto;
+            flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .sidebar img {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            margin: 0 auto 20px;
+            display: block;
+            border-radius: 10px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar ul li {
+            margin: 0;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 12px 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar ul li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .sidebar ul li a i {
+            font-size: 18px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .sidebar-footer p {
+            margin: 0;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            margin-left: 300px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            color: #1e3a8a;
+        }
+
+        .quick-actions button {
+            background-color: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-left: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .quick-actions button:hover {
+            background-color: #1c3d73;
+        }
+
+        /* Customer Info Section */
+        .customer-info, .order-history, .feedback-section, .loyalty-discounts, .update-status-section {
+            margin-bottom: 40px;
+        }
+
+        .customer-info h2, .order-history h2, .feedback-section h2, .loyalty-discounts h2, .update-status-section h2 {
+            color: #1e3a8a;
+            font-size: 24px;
+        }
+
+        .customer-info p, .order-history p, .feedback-section p, .loyalty-discounts p, .update-status-section p {
+            font-size: 16px;
+            color: #555;
+        }
+
+        /* Order History Table */
+        .order-history table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .order-history th, .order-history td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .order-history th {
+            background-color: #f4f7f9;
+        }
+
+        /* Feedback Section */
+        .feedback-section .feedback {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        /* Loyalty and Discounts Section */
+        .loyalty-discounts {
+            background-color: #f4f7f9;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .loyalty-discounts .discounts-list li {
+            background-color: #fff;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Update Customer Status */
+        .update-status-section {
+            padding: 20px;
+            background-color: #f4f7f9;
+            border-radius: 10px;
+        }
+
+        .update-status-section select {
+            padding: 12px;
+            font-size: 16px;
+            color: #555;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+            margin-bottom: 20px;
+            background-color: #fff;
+        }
+
+        /* Customer Table */
+        table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+        }
+
+        table th, table td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        table th {
+            background-color: #f4f7f9;
+        }
+
+        select {
+            padding: 12px;
+            font-size: 16px;
+            color: #555;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+            margin-bottom: 20px;
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="sidebar">
+            <h2>SCENTOVA</h2>
+            <img src="{{ url_for('static', filename='assets/scent-logo-new.png') }}" alt="Scentova Logo">
+            <ul>
+                <li><a href="{{ url_for('admin_dashboard') }}" class="active"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
+                <li><a href="{{ url_for('admin_manage_perfume') }}"><i class="fas fa-cogs"></i>Manage Perfumes</a></li>
+                <li><a href="{{ url_for('admin_order') }}"><i class="fas fa-shopping-cart"></i>Orders</a></li>
+                <li><a href="{{ url_for('admin_customer') }}"><i class="fas fa-users"></i>Customers</a></li>
+                <li><a href="{{ url_for('admin_supplier') }}"><i class="fas fa-users"></i>Supplier</a></li>
+                <li><a href="{{ url_for('admin_analytics') }}"><i class="fas fa-chart-line"></i>Analytics</a></li>
+                <li><a href="{{ url_for('admin_inventory') }}"><i class="fas fa-boxes"></i>Inventory</a></li>
+                <li><a href="{{ url_for('admin_discounts') }}"><i class="fas fa-tags"></i>Discounts & Offers</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i>Logout</a></li>
+            </ul>
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <p>© 2024 Scentova</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <header>
+                <h1>Customer Management</h1>
+            </header>
+
+            <!-- Customer Table -->
+            <div class="customer-table">
+                <h2>All Customers</h2>
+                <table id="customerTable">
+                    <thead>
+                        <tr>
+                            <th>Customer Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-customer="Ajay">
+                            <td>Ajay</td>
+                        </tr>
+                        <tr data-customer="John">
+                            <td>John</td>
+                        </tr>
+                        <tr data-customer="Sara">
+                            <td>Sara</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Dropdown for selecting customer -->
+            <div class="dropdown-section">
+                <h2>Select Customer</h2>
+                <select id="customerDropdown">
+                    <option value="">Select a Customer</option>
+                    <option value="Ajay">Ajay</option>
+                    <option value="John">John</option>
+                    <option value="Sara">Sara</option>
+                </select>
+            </div>
+
+            <!-- Personalized Customer Info Section -->
+            <div id="customerDetailsSection">
+                <!-- Dynamic Content will be injected here based on customer selection -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample Data for Customers
+        const customerData = {
+            "Ajay": {
+                details: {
+                    name: "Ajay",
+                    email: "ajay@example.com",
+                    phone: "+1234567890",
+                    vipStatus: "Yes"
+                },
+                orderHistory: [
+                    { orderId: "#1234", product: "Perfume XYZ", totalAmount: "$100", status: "Delivered" },
+                    { orderId: "#1235", product: "Perfume ABC", totalAmount: "$75", status: "Shipped" }
+                ],
+                feedback: [
+                    { orderId: "#1234", feedback: "Excellent product! Will buy again." },
+                    { orderId: "#1235", feedback: "Delivery was late, but product was great." }
+                ],
+                discounts: [
+                    "10% off on next order",
+                    "5% off on orders above $100"
+                ],
+                status: "VIP"
+            },
+            "John": {
+                details: {
+                    name: "John",
+                    email: "john@example.com",
+                    phone: "+0987654321",
+                    vipStatus: "No"
+                },
+                orderHistory: [
+                    { orderId: "#2234", product: "Perfume LMN", totalAmount: "$120", status: "Delivered" },
+                    { orderId: "#2235", product: "Perfume DEF", totalAmount: "$80", status: "Pending" }
+                ],
+                feedback: [
+                    { orderId: "#2234", feedback: "Great scent! Will definitely reorder." },
+                    { orderId: "#2235", feedback: "Not what I expected, but good." }
+                ],
+                discounts: [
+                    "5% off on next order"
+                ],
+                status: "Frequent"
+            },
+            "Sara": {
+                details: {
+                    name: "Sara",
+                    email: "sara@example.com",
+                    phone: "+9876543210",
+                    vipStatus: "Yes"
+                },
+                orderHistory: [
+                    { orderId: "#3234", product: "Perfume MNO", totalAmount: "$200", status: "Delivered" },
+                    { orderId: "#3235", product: "Perfume UVW", totalAmount: "$150", status: "Shipped" }
+                ],
+                feedback: [
+                    { orderId: "#3234", feedback: "Absolutely loved this fragrance!" },
+                    { orderId: "#3235", feedback: "Very nice, but delivery took a while." }
+                ],
+                discounts: [
+                    "15% off on next order",
+                    "Free shipping on orders over $100"
+                ],
+                status: "VIP"
+            }
+        };
+
+        // Event listener for dropdown selection
+        document.getElementById('customerDropdown').addEventListener('change', function() {
+            const customerName = this.value;
+            if (customerName) {
+                displayCustomerData(customerName);
+            } else {
+                document.getElementById('customerDetailsSection').innerHTML = '';
+            }
+        });
+
+        // Function to display customer data
+        function displayCustomerData(customerName) {
+            const customer = customerData[customerName];
+            let customerDetailsHTML = `
+                <h2>Customer Details for ${customer.details.name}</h2>
+                <p><strong>Email:</strong> ${customer.details.email}</p>
+                <p><strong>Phone:</strong> ${customer.details.phone}</p>
+                <p><strong>VIP Status:</strong> ${customer.details.vipStatus}</p>
+                
+                <h3>Order History</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Product</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            customer.orderHistory.forEach(order => {
+                customerDetailsHTML += `
+                    <tr>
+                        <td>${order.orderId}</td>
+                        <td>${order.product}</td>
+                        <td>${order.totalAmount}</td>
+                        <td>${order.status}</td>
+                    </tr>
+                `;
+            });
+            customerDetailsHTML += `</tbody></table>`;
+
+            customerDetailsHTML += `
+                <h3>Customer Feedback</h3>
+            `;
+            customer.feedback.forEach(feedback => {
+                customerDetailsHTML += `
+                    <div>
+                        <p><strong>Order ${feedback.orderId}</strong>: ${feedback.feedback}</p>
+                    </div>
+                `;
+            });
+
+            customerDetailsHTML += `
+                <h3>Loyalty & Discounts</h3>
+                <ul>
+            `;
+            customer.discounts.forEach(discount => {
+                customerDetailsHTML += `<li>${discount}</li>`;
+            });
+            customerDetailsHTML += `</ul>`;
+
+            customerDetailsHTML += `
+                <h3>Customer Status</h3>
+                <p>Status: ${customer.status}</p>
+            `;
+
+            document.getElementById('customerDetailsSection').innerHTML = customerDetailsHTML;
+        }
+    </script>
+</body>
+</html>

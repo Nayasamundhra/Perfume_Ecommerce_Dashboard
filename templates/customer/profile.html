@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Page - Dashboard</title>
+    <link rel="icon" href="{{ url_for('static', filename='assets/ini.png') }}" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f9;
+            color: #333;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-theme {
+            background-color: #1a1a1a;
+            color: #f4f7f9;
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #1e3a8a, #0f2c6d);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar ul li {
+            margin: 15px 0;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 12px 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar ul li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .sidebar ul li a i {
+            font-size: 18px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            margin-left: 300px;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: linear-gradient(90deg, #1e3a8a, #0f2c6d);
+            padding: 20px 30px;
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .add-to-cart-icon {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .add-to-cart-icon i {
+            font-size: 28px;
+            color: white;
+        }
+
+        .add-to-cart-icon .cart-count {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color:  #ddd239;
+            color: rgb(6, 5, 5);
+            border-radius: 50%;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+
+        /* Profile Section */
+        .profile-section {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .dark-theme .profile-section {
+            background-color: #333;
+            color: #f4f7f9;
+        }
+
+        .profile-section h2 {
+            margin: 0 0 20px;
+            font-size: 24px;
+            color: #1e3a8a;
+            transition: color 0.3s ease;
+        }
+
+        .dark-theme .profile-section h2 {
+            color: #ffffff;
+        }
+
+        .profile-picture {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-picture img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #1e3a8a;
+            transition: border-color 0.3s ease;
+            background-color: #e0e0e0; /* Light background for empty profile picture */
+        }
+
+        .dark-theme .profile-picture img {
+            border-color: white;
+            background-color: #555; /* Darker background for dark theme */
+        }
+
+        .profile-picture input {
+            display: none;
+        }
+
+        .profile-picture label {
+            display: block;
+            margin-top: 10px;
+            color: #1e3a8a;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: underline;
+            transition: color 0.3s ease;
+        }
+
+        .dark-theme .profile-picture label {
+            color: white;
+        }
+
+        .username-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .username-section input {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            border: none;
+            background: transparent;
+            color: inherit;
+            outline: none;
+            border-bottom: 2px solid #1e3a8a;
+            padding: 5px;
+            transition: border-color 0.3s ease;
+        }
+
+        .dark-theme .username-section input {
+            border-color: white;
+        }
+
+        .profile-details {
+            margin-bottom: 20px;
+        }
+
+        .profile-details label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #1e3a8a;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .dark-theme .profile-details label {
+            color: #ffffff;
+        }
+
+        .profile-details input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .dark-theme .profile-details input {
+            background-color: #444;
+            color: #f4f7f9;
+            border-color: #555;
+        }
+
+        .theme-preference {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .theme-preference label {
+            margin-right: 15px;
+            font-size: 16px;
+            color: #333;
+            transition: color 0.3s ease;
+        }
+
+        .dark-theme .theme-preference label {
+            color: #f4f7f9;
+        }
+
+        .save-button {
+            background: linear-gradient(90deg, #1e3a8a, #0f2c6d);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+        
+        .dark-theme .save-button {
+            background: white;
+            color: #1e3a8a;
+            font-size: 16px;
+            font-weight: bold;
+
+        }
+        
+        .sidebar img {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            margin: 0 auto 20px;
+            display: block;
+            border-radius: 10px;
+        }
+
+        .save-button:hover {
+            background: linear-gradient(90deg, #4a8eff, #1e3a8a);
+        }
+        
+        .dark-theme .save-button:hover {
+            background: linear-gradient(90deg, #4a8eff, #1e3a8a);
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: white;
+            font-size: 24px;
+        }
+
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #1e3a8a;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            margin-right: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="light-theme">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div>Loading profile data...</div>
+    </div>
+
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>SCENTOVA</h2>
+            <img src="{{ url_for('static', filename='assets/scent-logo-new.png') }}" alt="Scentova Logo">
+            <ul>
+                <li><a href="{{ url_for('customer_home') }}"><i class="fas fa-home"></i>Home</a></li>
+                <li><a href="{{ url_for('customer_cart') }}"><i class="fas fa-shopping-cart"></i>Cart</a></li>
+                <li><a href="{{ url_for('customer_order_history') }}"><i class="fas fa-history"></i>Order History</a></li>
+                <li><a href="{{ url_for('customer_profile') }}" class="active"><i class="fas fa-user"></i>Profile</a></li>
+                <li><a href="{{ url_for('customer_feedback') }}"><i class="fas fa-comment"></i>Feedback</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i>Logout</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header>
+                <h1>Profile</h1>
+                <div class="add-to-cart-icon" onclick="navigateToCart()">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count">0</span>
+                </div>
+            </header>
+
+            <!-- Profile Section -->
+            <div class="profile-section">
+                <h2>Profile Settings</h2>
+                <div class="profile-picture">
+                    <img src="{{ url_for('static', filename='assets/default-profile.png') }}" alt="Profile Picture" id="profile-img">
+                    <input type="file" id="upload" accept="image/*">
+                    <label for="upload">Change Profile Picture</label>
+                </div>
+                <div class="username-section">
+                    <input type="text" id="username" placeholder="Enter your username">
+                </div>
+                <div class="profile-details">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter your email">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" placeholder="Enter your phone number">
+                    <label for="address">Address</label>
+                    <input type="text" id="address" placeholder="Enter your address">
+                </div>
+                <div class="theme-preference">
+                    <label><input type="radio" name="theme" value="light" checked> Light Theme</label>
+                    <label><input type="radio" name="theme" value="dark"> Dark Theme</label>
+                </div>
+                <button class="save-button" onclick="saveChanges()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cart Management Functions
+        const userId = 1; // Replace with actual user ID from session
+
+        // Update Cart Count Display
+        function updateCartCountDisplay(count) {
+            const cartCountElements = document.querySelectorAll('.cart-count');
+            cartCountElements.forEach(el => {
+                el.textContent = count;
+            });
+        }
+
+        // Fetch Cart Items Count
+        function fetchCartItemsCount() {
+            fetch(`/api/customer/cart-count`)
+                .then(response => response.json())
+                .then(data => {
+                    updateCartCountDisplay(data.count || 0);
+                })
+                .catch(error => {
+                    console.error("Error fetching cart items count:", error);
+                    updateCartCountDisplay(0);
+                });
+        }
+
+        // Navigate to Cart
+        function navigateToCart() {
+            window.location.href = "{{ url_for('customer_cart') }}";
+        }
+
+        // Fetch User Profile Data
+        function fetchUserProfileData() {
+            // Show loading overlay
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            // In a real application, fetch from server
+            fetch('/api/customer/profile')
+                .then(response => response.json())
+                .then(data => {
+                    // Populate form with user data
+                    document.getElementById('username').value = data.username || '';
+                    document.getElementById('email').value = data.email || '';
+                    document.getElementById('phone').value = data.phone || '';
+                    document.getElementById('address').value = data.address || '';
+                    
+                    // Set profile picture if available
+                    if (data.profilePicture) {
+                        document.getElementById('profile-img').src = data.profilePicture;
+                    }
+                    
+                    // Hide loading overlay
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                })
+                .catch(error => {
+                    console.error("Error fetching profile data:", error);
+                    
+                    // For demo purposes, load from localStorage if server fetch fails
+                    document.getElementById('username').value = localStorage.getItem('username') || '';
+                    document.getElementById('email').value = localStorage.getItem('email') || '';
+                    document.getElementById('phone').value = localStorage.getItem('phone') || '';
+                    document.getElementById('address').value = localStorage.getItem('address') || '';
+                    
+                    const savedProfilePic = localStorage.getItem('profilePicture');
+                    if (savedProfilePic) {
+                        document.getElementById('profile-img').src = savedProfilePic;
+                    }
+                    
+                    // Hide loading overlay
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                });
+        }
+
+        // Initialize on Page Load
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchCartItemsCount();
+            fetchUserProfileData();
+        });
+
+        // Profile Picture Upload
+        document.getElementById('upload').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const profileImg = document.getElementById('profile-img');
+                    profileImg.src = e.target.result;
+                    // Save to localStorage
+                    localStorage.setItem('profilePicture', e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Theme Toggle
+        const themeRadios = document.querySelectorAll('input[name="theme"]');
+        const body = document.body;
+
+        // Load saved theme from localStorage
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        body.classList.add(`${savedTheme}-theme`);
+        document.querySelector(`input[value="${savedTheme}"]`).checked = true;
+
+        // Add event listeners to theme radios
+        themeRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                body.classList.remove('light-theme', 'dark-theme');
+                body.classList.add(`${radio.value}-theme`);
+                localStorage.setItem('theme', radio.value); // Save theme preference
+            });
+        });
+
+        // Save Changes
+        function saveChanges() {
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const address = document.getElementById('address').value;
+            const profilePicture = document.getElementById('profile-img').src;
+
+            // Show loading overlay
+            document.getElementById('loadingOverlay').style.display = 'flex';
+
+            // In a real application, save to server
+            const userData = {
+                username,
+                email,
+                phone,
+                address,
+                profilePicture
+            };
+
+            // Simulate API call
+            setTimeout(() => {
+                // Save to localStorage as fallback
+                localStorage.setItem('username', username);
+                localStorage.setItem('email', email);
+                localStorage.setItem('phone', phone);
+                localStorage.setItem('address', address);
+                localStorage.setItem('profilePicture', profilePicture);
+
+                // Hide loading overlay
+                document.getElementById('loadingOverlay').style.display = 'none';
+
+                alert('Changes saved successfully!');
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

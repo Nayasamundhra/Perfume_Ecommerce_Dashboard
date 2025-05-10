@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scentova - Feedback</title>
+    <link rel="icon" href="{{ url_for('static', filename='assets/ini.png') }}" type="image/x-icon" />
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f9;
+            color: #333;
+            display: flex;
+        }
+
+        .dashboard {
+            display: flex;
+            width: 100%;
+        }
+
+        .sidebar img {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            margin: 0 auto 20px;
+            display: block;
+            border-radius: 10px;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #1e3a8a, #0f2c6d);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar ul li {
+            margin: 0;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 12px 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar ul li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .sidebar ul li a i {
+            font-size: 18px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            margin-left: 300px; /* Adjusted to match sidebar width */
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: linear-gradient(90deg, #1e3a8a, #0f2c6d);
+            padding: 20px 30px;
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .add-to-cart-icon {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .add-to-cart-icon i {
+            font-size: 28px;
+            color: white;
+        }
+
+        .add-to-cart-icon .cart-count {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #ddd239;
+            color: rgb(6, 5, 5);
+            border-radius: 50%;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+
+        .feedback-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin-top: 350px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .feedback-container h2 {
+            margin-bottom: 20px;
+            color: #1e3a8a;
+        }
+
+        .feedback-container textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            resize: none;
+        }
+
+        .feedback-container button {
+            background: linear-gradient(90deg, #1e3a8a, #0f2c6d);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .feedback-container button:hover {
+            background: linear-gradient(90deg, #0f2c6d, #1e3a8a);
+        }
+
+        /* Star Rating Styles */
+        .star-rating {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .star-rating .star {
+            font-size: 40px; /* Bigger stars */
+            color: #ccc;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            margin: 0 5px; /* Space between stars */
+        }
+
+        .star-rating .star.selected {
+            color: #ddd239; /* Yellow color for selected stars */
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>SCENTOVA</h2>
+            <img src="{{ url_for('static', filename='assets/scent-logo-new.png') }}" alt="Scentova Logo">
+            <ul>
+                <li><a href="{{ url_for('customer_home') }}"><i class="fas fa-home"></i>Home</a></li>
+                <li><a href="{{ url_for('customer_cart') }}"><i class="fas fa-shopping-cart"></i>Cart</a></li>
+                <li><a href="{{ url_for('customer_order_history') }}"><i class="fas fa-history"></i>Order History</a></li>
+                <li><a href="{{ url_for('customer_profile') }}"><i class="fas fa-user"></i>Profile</a></li>
+                <li><a href="{{ url_for('customer_feedback') }}" class="active"><i class="fas fa-comment"></i>Feedback</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i>Logout</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header>
+                <h1>Feedback</h1>
+                <div class="add-to-cart-icon" onclick="navigateToCart()">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count">0</span>
+                </div>
+            </header>
+
+            <!-- Feedback Container -->
+            <div class="feedback-container">
+                <h2>We'd Love Your Feedback!</h2>
+                <div class="star-rating">
+                    <span class="star" data-value="1">&#9733;</span>
+                    <span class="star" data-value="2">&#9733;</span>
+                    <span class="star" data-value="3">&#9733;</span>
+                    <span class="star" data-value="4">&#9733;</span>
+                    <span class="star" data-value="5">&#9733;</span>
+                </div>
+                <textarea id="feedback" placeholder="Tell us about your experience..."></textarea>
+                <button onclick="submitFeedback()">Submit Feedback</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize cart count on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchCartItemsCount();
+        });
+
+        function updateCartCountDisplay(count) {
+            const cartCountElements = document.querySelectorAll('.cart-count');
+            cartCountElements.forEach(el => {
+                el.textContent = count;
+            });
+        }
+        
+        function fetchCartItemsCount() {
+            fetch(`/api/customer/cart-count`)
+                .then(response => response.json())
+                .then(data => {
+                    updateCartCountDisplay(data.count || 0);
+                })
+                .catch(error => {
+                    console.error("Error fetching cart items count:", error);
+                    updateCartCountDisplay(0);
+                });
+        }
+        
+        function navigateToCart() {
+            window.location.href = "{{ url_for('customer_cart') }}";
+        }
+        
+        // Function to handle star rating
+        const stars = document.querySelectorAll('.star-rating .star');
+        let selectedRating = 0;
+
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                const value = parseInt(star.getAttribute('data-value'));
+                selectedRating = value;
+
+                // Highlight stars up to the clicked one
+                stars.forEach((s, index) => {
+                    if (index < value) {
+                        s.classList.add('selected');
+                    } else {
+                        s.classList.remove('selected');
+                    }
+                });
+            });
+        });
+
+        // Function to submit feedback
+        function submitFeedback() {
+            const feedback = document.getElementById("feedback").value;
+            if (!feedback) {
+                alert("Please enter your feedback before submitting.");
+                return;
+            }
+
+            if (selectedRating === 0) {
+                alert("Please select a rating before submitting.");
+                return;
+            }
+
+            // Save feedback and rating to localStorage
+            let feedbacks = JSON.parse(localStorage.getItem("feedbacks")) || [];
+            feedbacks.push({ feedback, rating: selectedRating });
+            localStorage.setItem("feedbacks", JSON.stringify(feedbacks));
+
+            alert("Thank you for your feedback!");
+            window.location.href = "/customer/order-history"; // Redirect to history page
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management | Scentova Admin</title>
+    <link rel="icon" href="{{ url_for('static', filename='assets/ini.png') }}" type="image/x-icon" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+
+        .dashboard {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #1e3a8a;
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding: 20px;
+            display: flex;
+            overflow-y: auto;
+            flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .sidebar img {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            margin: 0 auto 20px;
+            display: block;
+            border-radius: 10px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar ul li {
+            margin: 0;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 12px 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar ul li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .sidebar ul li a i {
+            font-size: 18px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .sidebar-footer p {
+            margin: 0;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            margin-left: 300px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            color: #1e3a8a;
+        }
+
+        .quick-actions button {
+            background-color: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-left: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .quick-actions button:hover {
+            background-color: #1c3d73;
+        }
+
+        /* Inventory Table */
+        .inventory-table {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .inventory-table h2 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+        }
+
+        .inventory-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .inventory-table th,
+        .inventory-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .inventory-table th {
+            background-color: #1e3a8a;
+            color: white;
+        }
+
+        .inventory-table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .inventory-table .low-stock {
+            color: #c62828;
+            font-weight: bold;
+        }
+
+        .inventory-table .restock-btn {
+            background-color: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .inventory-table .restock-btn:hover {
+            background-color: #1c3d73;
+        }
+
+        /* Stock Alerts */
+        .stock-alerts {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .stock-alerts h2 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+        }
+
+        .stock-alerts ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .stock-alerts li {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        /* Stock Health Overview */
+        .stock-health-overview {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .stock-health-overview h2 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+        }
+
+        .stock-health-overview .progress-bar {
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .stock-health-overview .progress {
+            background-color: #1e3a8a;
+            height: 20px;
+            width: 60%;
+        }
+
+        .stock-health-overview .chart {
+            width: 100%;
+            height: 300px;
+        }
+
+        /* Add Stock Form */
+        .add-stock-form {
+            display: none;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .add-stock-form h2 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+        }
+
+        .add-stock-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .add-stock-form input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .add-stock-form button {
+            background-color: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .add-stock-form button:hover {
+            background-color: #1c3d73;
+        }
+
+        .add-stock-form .error {
+            color: #c62828;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="sidebar">
+            <h2>SCENTOVA</h2>
+            <img src="{{ url_for('static', filename='assets/scent-logo-new.png') }}" alt="Scentova Logo">
+            <ul>
+                <li><a href="{{ url_for('admin_dashboard') }}" class="active"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
+                <li><a href="{{ url_for('admin_manage_perfume') }}"><i class="fas fa-cogs"></i>Manage Perfumes</a></li>
+                <li><a href="{{ url_for('admin_order') }}"><i class="fas fa-shopping-cart"></i>Orders</a></li>
+                <li><a href="{{ url_for('admin_customer') }}"><i class="fas fa-users"></i>Customers</a></li>
+                <li><a href="{{ url_for('admin_supplier') }}"><i class="fas fa-users"></i>Supplier</a></li>
+                <li><a href="{{ url_for('admin_analytics') }}"><i class="fas fa-chart-line"></i>Analytics</a></li>
+                <li><a href="{{ url_for('admin_inventory') }}"><i class="fas fa-boxes"></i>Inventory</a></li>
+                <li><a href="{{ url_for('admin_discounts') }}"><i class="fas fa-tags"></i>Discounts & Offers</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i>Logout</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <p>© 2024 Scentova</p>
+            </div>
+        </div>
+        <div class="main-content">
+            <header>
+                <h1>Inventory Management</h1>
+                <div class="quick-actions">
+                    <button id="addStock">Add Stock</button>
+                </div>
+            </header>
+
+            <!-- Add Stock Form -->
+            <div class="add-stock-form" id="addStockForm">
+                <h2>Add New Stock</h2>
+                <form id="stockForm">
+                    <label for="productName">Product Name</label>
+                    <input type="text" id="productName" name="productName" required>
+                    <div class="error" id="productNameError"></div>
+
+                    <label for="stockLevel">Stock Level</label>
+                    <input type="number" id="stockLevel" name="stockLevel" required>
+                    <div class="error" id="stockLevelError"></div>
+
+                    <label for="threshold">Threshold</label>
+                    <input type="number" id="threshold" name="threshold" required>
+                    <div class="error" id="thresholdError"></div>
+
+                    <button type="submit">Add Stock</button>
+                </form>
+            </div>
+
+            <!-- Inventory Table -->
+            <div class="inventory-table">
+                <h2>Current Stock Levels</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Stock Level</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stockTableBody">
+                        <!-- Dynamic rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Stock Alerts -->
+            <div class="stock-alerts">
+                <h2>Stock Alerts</h2>
+                <ul id="stockAlertsList">
+                    <!-- Dynamic alerts will be inserted here -->
+                </ul>
+            </div>
+
+            <!-- Stock Health Overview -->
+            <div class="stock-health-overview">
+                <h2>Stock Health Overview</h2>
+                <div class="progress-bar">
+                    <div class="progress" id="stockProgress"></div>
+                </div>
+                <div class="chart">
+                    <canvas id="stockHealthChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample Data
+        let inventoryData = [
+            { product: 'Chanel No. 5', stock: 15, threshold: 20 },
+            { product: 'Dior Sauvage', stock: 8, threshold: 10 },
+            { product: 'Gucci Bloom', stock: 25, threshold: 30 },
+            { product: 'YSL Black Opium', stock: 5, threshold: 10 },
+        ];
+
+        // Function to update the inventory table
+        function updateInventoryTable() {
+            const tableBody = document.getElementById('stockTableBody');
+            tableBody.innerHTML = '';
+
+            inventoryData.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.product}</td>
+                    <td>${item.stock}</td>
+                    <td class="${item.stock <= item.threshold ? 'low-stock' : ''}">
+                        ${item.stock <= item.threshold ? 'Low Stock' : 'In Stock'}
+                    </td>
+                    <td>
+                        <button class="restock-btn" onclick="restockProduct('${item.product}')">Restock</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Function to update stock alerts
+        function updateStockAlerts() {
+            const alertsList = document.getElementById('stockAlertsList');
+            alertsList.innerHTML = '';
+
+            inventoryData.forEach(item => {
+                if (item.stock <= item.threshold) {
+                    const alert = document.createElement('li');
+                    alert.textContent = `${item.product} is low in stock (${item.stock} remaining).`;
+                    alertsList.appendChild(alert);
+                }
+            });
+        }
+
+        // Function to restock a product
+        function restockProduct(product) {
+            const item = inventoryData.find(i => i.product === product);
+            if (item) {
+                item.stock += 50; // Add 50 units
+                updateInventoryTable();
+                updateStockAlerts();
+                updateStockHealth();
+            }
+        }
+
+        // Function to simulate stock updates (e.g., from orders)
+        function simulateStockUpdate() {
+            inventoryData.forEach(item => {
+                item.stock -= Math.floor(Math.random() * 5); // Random stock reduction
+            });
+            updateInventoryTable();
+            updateStockAlerts();
+            updateStockHealth();
+        }
+
+        // Function to update stock health overview
+        function updateStockHealth() {
+            const totalStock = inventoryData.reduce((sum, item) => sum + item.stock, 0);
+            const totalThreshold = inventoryData.reduce((sum, item) => sum + item.threshold, 0);
+            const progress = (totalStock / totalThreshold) * 100;
+            document.getElementById('stockProgress').style.width = `${progress}%`;
+
+            // Update Stock Health Chart
+            stockHealthChart.data.datasets[0].data = [totalStock, totalThreshold - totalStock];
+            stockHealthChart.update();
+        }
+
+        // Show Add Stock Form
+        document.getElementById('addStock').addEventListener('click', function() {
+            document.getElementById('addStockForm').style.display = 'block';
+        });
+
+        // Handle Form Submission
+        document.getElementById('stockForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const productName = document.getElementById('productName').value.trim();
+            const stockLevel = parseInt(document.getElementById('stockLevel').value);
+            const threshold = parseInt(document.getElementById('threshold').value);
+
+            // Validation
+            let isValid = true;
+
+            if (!productName) {
+                document.getElementById('productNameError').textContent = 'Product name is required.';
+                isValid = false;
+            } else {
+                document.getElementById('productNameError').textContent = '';
+            }
+
+            if (isNaN(stockLevel) || stockLevel < 0) {
+                document.getElementById('stockLevelError').textContent = 'Stock level must be a positive number.';
+                isValid = false;
+            } else {
+                document.getElementById('stockLevelError').textContent = '';
+            }
+
+            if (isNaN(threshold) || threshold < 0) {
+                document.getElementById('thresholdError').textContent = 'Threshold must be a positive number.';
+                isValid = false;
+            } else {
+                document.getElementById('thresholdError').textContent = '';
+            }
+
+            if (isValid) {
+                // Add new product to inventory
+                inventoryData.push({ product: productName, stock: stockLevel, threshold: threshold });
+                updateInventoryTable();
+                updateStockAlerts();
+                updateStockHealth();
+
+                // Reset form
+                document.getElementById('stockForm').reset();
+                document.getElementById('addStockForm').style.display = 'none';
+            }
+        });
+
+        // Stock Health Chart
+        const stockHealthCtx = document.getElementById('stockHealthChart').getContext('2d');
+        const stockHealthChart = new Chart(stockHealthCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Current Stock', 'Remaining Threshold'],
+                datasets: [{
+                    data: [100, 0],
+                    backgroundColor: ['#1e3a8a', '#e0e0e0'],
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                },
+            },
+        });
+
+        // Initial update
+        updateInventoryTable();
+        updateStockAlerts();
+        updateStockHealth();
+
+        // Update inventory and alerts every 10 seconds
+        setInterval(simulateStockUpdate, 10000);
+    </script>
+</body>
+</html>

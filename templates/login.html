@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scentova - Login</title>
+    <link rel="icon" href="{{ url_for('static', filename='assets/ini.png') }}" type="image/x-icon" />
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url("{{ url_for('static', filename='assets/5.jpeg') }}"); /* Update path to static folder */
+            font-family: sans-serif;
+            background-repeat: no-repeat;
+            background-size: cover;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            width: 80%;
+            max-width: 1200px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .perfume-image {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .perfume-image img {
+            width: auto;
+            max-height: 50%;
+            max-width: 80%;
+            display: block;
+            margin: 0 auto;
+            object-fit: contain;
+        }
+
+        .login-form {
+            flex: 1;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 0 10px 10px 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            background-color: #f7b731;
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #e0a800;
+        }
+
+        .error-message {
+            color: red;
+            text-align: center;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .google-login {
+            margin-top: 20px;
+        }
+
+        .google-btn {
+            background-color: #4285f4;
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        .google-btn:hover {
+            background-color: #357ae8;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 90%;
+                height: auto;
+            }
+
+            .perfume-image {
+                width: 100%;
+                max-height: 25vh;
+                margin-bottom: 20px;
+                border-radius: 10px 10px 0 0;
+            }
+            .perfume-image img {
+                max-width: 80%;
+                max-height: 100%;
+            }
+
+            .login-form {
+                border-radius: 0 0 10px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="perfume-image">
+            <img src="{{ url_for('static', filename='assets/scentova-img.png') }}" alt="Scentova Logo">
+        </div>
+        <div class="login-form">
+            <h1>Login</h1>
+            <div id="errorMessage" class="error-message"></div>
+            <form id="loginForm" autocomplete="new-password">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email_field" autocomplete="new-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password_field" autocomplete="new-password" required>
+                </div>
+                <button type="submit" class="btn">Log In</button>
+            </form>
+            <div class="google-login">
+                <a href="/sign_up">
+                    <button class="google-btn">Sign Up</button>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const emailField = document.getElementById('email');
+        const passwordField = document.getElementById('password');
+        
+        // Generate random field names to prevent autofill
+        const randomString = Math.random().toString(36).substring(2);
+        emailField.name = 'email_' + randomString;
+        passwordField.name = 'pwd_' + randomString;
+        
+        // Immediate reset
+        loginForm.reset();
+        emailField.value = '';
+        passwordField.value = '';
+        
+        // Delay reset to override browser autofill
+        setTimeout(function() {
+            emailField.value = '';
+            passwordField.value = '';
+        }, 100);
+        
+        // Another reset with longer delay as backup
+        setTimeout(function() {
+            emailField.value = '';
+            passwordField.value = '';
+        }, 500);
+
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = emailField.value;
+            const password = passwordField.value;
+
+            // Clear previous error messages
+            errorMessage.textContent = '';
+            errorMessage.style.display = 'none';
+
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.redirect) {
+                    // Successful login, redirect to appropriate dashboard
+                    window.location.href = data.redirect;
+                } else {
+                    // Show error message
+                    errorMessage.textContent = data.error || 'Login failed';
+                    errorMessage.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                errorMessage.textContent = 'An error occurred. Please try again.';
+                errorMessage.style.display = 'block';
+            });
+        });
+    });
+    </script>
+</body>
+</html>

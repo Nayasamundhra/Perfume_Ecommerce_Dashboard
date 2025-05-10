@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management | Scentova Admin</title>
+    <link rel="icon" href="{{ url_for('static', filename='assets/ini.png') }}" type="image/x-icon" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+
+        .dashboard {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #1e3a8a;
+            color: white;
+            height: 100vh; /* Makes the sidebar stretch to full viewport height */
+            position: fixed;
+            padding: 20px;
+            display: flex;
+            overflow-y: auto;
+            flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .sidebar img {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            margin: 0 auto 20px;
+            display: block;
+            border-radius: 10px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar ul li {
+            margin: 0;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 12px 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar ul li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .sidebar ul li a i {
+            font-size: 18px;
+        }
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .sidebar-footer p {
+            margin: 0;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            margin-left: 300px;
+        }
+
+        h1 {
+            color: #1e3a8a;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #1e3a8a;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f4f7f9;
+        }
+
+        tr:hover {
+            background-color: #e0e7ff;
+        }
+
+        select, button {
+            padding: 7px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button {
+            background-color: #1e3a8a;
+            color: white;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #1c3d73;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="sidebar">
+            <h2>SCENTOVA</h2>
+            <img src="{{ url_for('static', filename='assets/scent-logo-new.png') }}" alt="Scentova Logo">
+            <ul>
+                <li><a href="{{ url_for('admin_dashboard') }}" class="active"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
+                <li><a href="{{ url_for('admin_manage_perfume') }}"><i class="fas fa-cogs"></i>Manage Perfumes</a></li>
+                <li><a href="{{ url_for('admin_order') }}"><i class="fas fa-shopping-cart"></i>Orders</a></li>
+                <li><a href="{{ url_for('admin_customer') }}"><i class="fas fa-users"></i>Customers</a></li>
+                <li><a href="{{ url_for('admin_supplier') }}"><i class="fas fa-users"></i>Supplier</a></li>
+                <li><a href="{{ url_for('admin_analytics') }}"><i class="fas fa-chart-line"></i>Analytics</a></li>
+                <li><a href="{{ url_for('admin_inventory') }}"><i class="fas fa-boxes"></i>Inventory</a></li>
+                <li><a href="{{ url_for('admin_discounts') }}"><i class="fas fa-tags"></i>Discounts & Offers</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i>Logout</a></li>
+            </ul>
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <p>© 2024 Scentova</p>
+            </div>
+        </div>
+        <div class="main-content">
+            <h1>Orders Management</h1>
+            <table id="ordersTable">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        async function fetchOrders() {
+            try {
+                const response = await fetch('/orders');
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+                const orders = await response.json();
+                updateOrdersTable(orders);
+            } catch (error) {
+                console.error("Error fetching orders:", error);
+            }
+        }
+        async function removeOrder(orderId) {
+            try {
+                const response = await fetch(`/delete_order/${orderId}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Failed to delete order');
+
+                fetchOrders(); // Refresh the orders table after deletion
+            } catch (error) {
+                console.error("Error deleting order:", error);
+            }
+        }
+
+        function updateOrdersTable(orders) {
+            const tableBody = document.querySelector('#ordersTable tbody');
+            tableBody.innerHTML = '';
+
+            orders.forEach(order => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${order.order_id}</td>
+                    <td>${order.customer_name}</td>
+                    <td>${order.product_name}</td>
+                    <td>${order.quantity}</td>
+                    <td>₹${order.total_amt}</td>
+                    <td>
+                        <select>
+                            <option value="Pending" ${order.status === "Pending" ? "selected" : ""}>Pending</option>
+                            <option value="Shipped" ${order.status === "Shipped" ? "selected" : ""}>Shipped</option>
+                            <option value="Delivered" ${order.status === "Delivered" ? "selected" : ""}>Delivered</option>
+                        </select>
+                    </td>
+                    <td><button onclick="removeOrder(${order.order_id})">Remove</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        fetchOrders();
+    </script>
+</body>
+</html>

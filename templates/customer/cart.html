@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scentova - Cart</title>
+    <link rel="icon" href="{{ url_for('static', filename='assets/ini.png') }}" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Your existing CSS styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+
+        .dashboard {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #1e3a8a, #0f2c6d);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar ul li {
+            margin: 0;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 12px 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar ul li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .sidebar ul li a i {
+            font-size: 18px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            margin-left: 300px; /* Match sidebar width + extra spacing */
+            max-width: calc(100% - 270px); /* Prevent overflow */
+            box-sizing: border-box; /* Include padding in width calculation */
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: linear-gradient(90deg, #1e3a8a, #0f2c6d);
+            padding: 20px 30px;
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .add-to-cart-icon {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .add-to-cart-icon i {
+            font-size: 28px;
+            color: white;
+        }
+
+        .add-to-cart-icon .cart-count {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #ddd239;
+            color: rgb(7, 7, 7);
+            border-radius: 50%;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+
+        /* Cart Items */
+        .cart-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .cart-item img {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+        }
+
+        .cart-item-details {
+            flex: 1;
+            margin-left: 20px;
+        }
+
+        .cart-item-details h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #1e3a8a;
+        }
+
+        .cart-item-details p {
+            margin: 5px 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .cart-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cart-item-actions input {
+            width: 50px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .cart-item-actions button {
+            background:  #ddd239;
+            color: rgb(16, 15, 15);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .cart-item-actions button:hover {
+            background: #ff6b81;
+        }
+
+        .cart-total {
+            text-align: right;
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .cart-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .cart-actions button {
+            background: linear-gradient(90deg, #1e3a8a, #0f2c6d);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 16px;
+        }
+        .sidebar img {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            margin: 0 auto 20px;
+            display: block;
+            border-radius: 10px;
+        }
+        .cart-actions button:hover {
+            background: linear-gradient(90deg, #0f2c6d, #1e3a8a);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>SCENTOVA</h2>
+            <img src="{{ url_for('static', filename='assets/scent-logo-new.png') }}" alt="Scentova Logo">
+            <ul>
+                <li><a href="{{ url_for('customer_home') }}" class="active"><i class="fas fa-home"></i>Home</a></li>
+                <li><a href="{{ url_for('customer_cart') }}"><i class="fas fa-shopping-cart"></i>Cart</a></li>
+                <li><a href="{{ url_for('customer_order_history') }}"><i class="fas fa-history"></i>Order History</a></li>
+                <li><a href="{{ url_for('customer_profile') }}"><i class="fas fa-user"></i>Profile</a></li>
+                <li><a href="{{ url_for('customer_feedback') }}"><i class="fas fa-comment"></i>Feedback</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i>Logout</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header>
+                <h1>Scentova</h1>
+                <div class="add-to-cart-icon" onclick="navigateToCart()">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count">0</span>
+                </div>
+            </header>
+
+            <!-- Cart Items -->
+            <div id="cartItems">
+                <!-- Cart items will be dynamically added here -->
+            </div>
+            <div class="cart-total">
+                Total: $<span id="cartTotal">0</span>
+            </div>
+            <div class="cart-actions">
+                <button onclick="location.href='/customer/home'">Continue Shopping</button>
+                <button onclick="window.location.href='/customer/checkout'">Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userId = 1; // Replace with actual user ID from session
+        // Fetch Cart Items
+function fetchCartItems() {
+    fetch('/api/customer/cart')
+        .then(response => response.json())
+        .then(data => {
+            const cartItems = document.getElementById('cartItems');
+            if (data.length === 0) {
+                // Handle empty cart scenario
+                cartItems.innerHTML = `
+                    <div class="no-cart-items" style="text-align: center; padding: 50px; color: #666;">
+                        <i class="fas fa-shopping-cart" style="font-size: 64px; color: #ccc; margin-bottom: 20px;"></i>
+                        <p>Your cart is empty. Start shopping!</p>
+                        <button onclick="window.location.href='/'" style="
+                            background: linear-gradient(90deg, #1e3a8a, #0f2c6d);
+                            color: white;
+                            border: none;
+                            padding: 12px 24px;
+                            border-radius: 10px;
+                            cursor: pointer;
+                            margin-top: 20px;
+                        ">Continue Shopping</button>
+                    </div>
+                `;
+                document.getElementById('cartTotal').textContent = '0.00';
+                updateCartCountDisplay(0);
+            } else {
+                cartItems.innerHTML = data.map(item => `
+                    <div class="cart-item">
+                        <img src="${item.image_url}" alt="${item.name}">
+                        <div class="cart-item-details">
+                            <h3>${item.name}</h3>
+                            <p>$${item.price} x ${item.quantity} = $${item.total_price}</p>
+                        </div>
+                        <div class="cart-item-actions">
+                            <button onclick="updateQuantity(${item.cart_id}, ${item.quantity - 1})">-</button>
+                            <input type="number" value="${item.quantity}" min="1" onchange="updateQuantity(${item.cart_id}, this.value)">
+                            <button onclick="updateQuantity(${item.cart_id}, ${item.quantity + 1})">+</button>
+                            <button onclick="removeFromCart(${item.cart_id})">Remove</button>
+                        </div>
+                    </div>
+                `).join('');
+                updateCartTotal(data);
+                updateCartCountDisplay(data.reduce((total, item) => total + item.quantity, 0));
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching cart items:", error);
+        });
+}
+
+// Update Quantity
+function updateQuantity(cart_id, quantity) {
+    quantity = parseInt(quantity);
+    if (quantity < 1) return; // Prevent quantity from being less than 1
+    
+    fetch(`/api/customer/update-cart/${cart_id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity })
+    }).then(response => response.json())
+      .then(data => {
+          fetchCartItems(); // Reload entire cart to reflect changes
+      })
+      .catch(error => {
+          console.error("Error updating cart item:", error);
+          alert("Failed to update item quantity. Please try again.");
+      });
+}
+
+// Remove from Cart
+function removeFromCart(cart_id) {
+    fetch(`/api/customer/remove-from-cart/${cart_id}`, {
+        method: 'DELETE'
+    }).then(response => response.json())
+      .then(data => {
+          fetchCartItems(); // Reload entire cart after removal
+      })
+      .catch(error => {
+          console.error("Error removing cart item:", error);
+          alert("Failed to remove item from cart. Please try again.");
+      });
+}
+
+// Update Cart Total
+function updateCartTotal(cartItems) {
+    const total = cartItems.reduce((sum, item) => sum + parseFloat(item.total_price), 0);
+    document.getElementById('cartTotal').textContent = total.toFixed(2);
+}
+
+// Update Cart Count Display
+function updateCartCountDisplay(count) {
+    const cartCountElements = document.querySelectorAll('.cart-count');
+    cartCountElements.forEach(el => {
+        el.textContent = count;
+    });
+}
+
+// Load cart count on page load
+function fetchCartCount() {
+    fetch('/api/customer/cart-count')
+        .then(response => response.json())
+        .then(data => {
+            updateCartCountDisplay(data.count);
+        })
+        .catch(error => {
+            console.error("Error fetching cart count:", error);
+        });
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    fetchCartItems();
+    fetchCartCount();
+});
+
+// Navigate to Cart
+function navigateToCart() {
+    window.location.href = '/customer/cart';
+}
+
+// Navigate to Home
+function continueShopping() {
+    window.location.href = '/customer/home';
+}
+    </script>
+</body>
+</html>

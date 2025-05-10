@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scentova - Home</title>
+    <link rel="icon" href="{{ url_for('static', filename='assets/ini.png') }}" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+
+        .dashboard {
+            display: flex;
+        }
+
+        .sidebar img {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            margin: 0 auto 20px;
+            display: block;
+            border-radius: 10px;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #1e3a8a, #0f2c6d);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar ul li {
+            margin: 0;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 12px 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar ul li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .sidebar ul li a i {
+            font-size: 18px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            margin-left: 300px; /* Adjusted to match sidebar width */
+            padding-left: 40px; /* Added padding to create space */
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: linear-gradient(90deg, #1e3a8a, #0f2c6d);
+            padding: 20px 30px;
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .add-to-cart-icon {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .add-to-cart-icon i {
+            font-size: 28px;
+            color: white;
+        }
+
+        .add-to-cart-icon .cart-count {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #ddd239;
+            color: rgb(10, 10, 10);
+            border-radius: 50%;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+
+        /* Categories */
+        .categories {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .categories button {
+            background: linear-gradient(90deg, #1e3a8a, #0f2c6d);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            font-size: 18px;
+            flex: 1;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .categories button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Perfume Grid */
+        .perfume-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .perfume-card {
+            background-color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .perfume-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .perfume-card img {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .perfume-card h3 {
+            margin: 0;
+            font-size: 22px;
+            color: #1e3a8a;
+        }
+
+        .perfume-card p {
+            font-size: 18px;
+            color: #333;
+            margin: 15px 0;
+        }
+
+        .perfume-card .price {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1e3a8a;
+            margin: 15px 0;
+        }
+
+        .perfume-card .category-badge {
+            display: inline-block;
+            background-color: #f0f0f0;
+            color: #1e3a8a;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .perfume-card button {
+            background: linear-gradient(90deg, #1e3a8a, #0f2c6d);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 16px;
+        }
+
+        .perfume-card button:hover {
+            background: linear-gradient(90deg, #0f2c6d, #1e3a8a);
+        }
+
+        /* Perfume Details Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .modal-content img {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .modal-content h3 {
+            margin: 0;
+            font-size: 24px;
+            color: #1e3a8a;
+        }
+
+        .modal-content p.description {
+            font-size: 16px;
+            color: #333;
+            margin: 15px 0;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .modal-content p.price {
+            font-size: 22px;
+            font-weight: bold;
+            color: #1e3a8a;
+            margin: 15px 0;
+        }
+
+        .modal-content .category-badge {
+            display: inline-block;
+            background-color: #f0f0f0;
+            color: #1e3a8a;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .quantity-control button {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quantity-control input {
+            width: 60px;
+            padding: 8px;
+            text-align: center;
+            margin: 0 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .modal-content button.add-to-cart-btn {
+            background: linear-gradient(90deg, #1e3a8a, #0f2c6d);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        .modal-content button.add-to-cart-btn:hover {
+            background: linear-gradient(90deg, #0f2c6d, #1e3a8a);
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #1e3a8a;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Close Button for Modal */
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #1e3a8a;
+        }
+
+        .close-modal:hover {
+            color: #0f2c6d;
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #666;
+            grid-column: 1 / -1;
+        }
+
+        /* Success Message */
+        .success-message {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1500;
+            animation: fadeIn 0.3s, fadeOut 0.3s 2.7s;
+            animation-fill-mode: forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 10px;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding-left: 20px;
+                padding-right: 20px;
+                margin-left: 300px; /* Match sidebar width + extra spacing */
+                max-width: calc(100% - 270px); /* Prevent overflow */
+                box-sizing: border-box; /* Include padding in width calculation */
+            }
+            
+            .categories {
+                flex-wrap: wrap;
+            }
+            
+            .categories button {
+                padding: 15px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="success-message" id="successMessage">
+        Item added to cart successfully!
+    </div>
+
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>SCENTOVA</h2>
+            <img src="{{ url_for('static', filename='assets/scent-logo-new.png') }}" alt="Scentova Logo">
+            <ul>
+                <li><a href="{{ url_for('customer_home') }}" class="active"><i class="fas fa-home"></i>Home</a></li>
+                <li><a href="{{ url_for('customer_cart') }}"><i class="fas fa-shopping-cart"></i>Cart</a></li>
+                <li><a href="{{ url_for('customer_order_history') }}"><i class="fas fa-history"></i>Order History</a></li>
+                <li><a href="{{ url_for('customer_profile') }}"><i class="fas fa-user"></i>Profile</a></li>
+                <li><a href="{{ url_for('customer_feedback') }}"><i class="fas fa-comment"></i>Feedback</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i>Logout</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header>
+                <h1>Welcome To Scentova</h1>
+                <div class="add-to-cart-icon" onclick="navigateToCart()">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </div>
+            </header>
+
+            <!-- Categories -->
+            <div class="categories">
+                <button onclick="showPerfumes('all')" id="allBtn">All</button>
+                <button onclick="showPerfumes('men')" id="menBtn">Men</button>
+                <button onclick="showPerfumes('women')" id="womenBtn">Women</button>
+                <button onclick="showPerfumes('unisex')" id="unisexBtn">Unisex</button>
+            </div>
+
+            <!-- Perfume Grid -->
+            <div class="perfume-grid" id="perfumeGrid">
+                <!-- Perfume cards will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Perfume Details Modal -->
+    <div class="modal" id="perfumeModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <img id="modalImage" src="" alt="Perfume Image">
+            <div id="modalCategory" class="category-badge"></div>
+            <h3 id="modalName"></h3>
+            <p id="modalDescription" class="description"></p>
+            <p id="modalPrice" class="price"></p>
+            
+            <div class="quantity-control">
+                <button onclick="decrementQuantity()">-</button>
+                <input type="number" id="quantity" min="1" value="1">
+                <button onclick="incrementQuantity()">+</button>
+            </div>
+            
+            <button onclick="addToCart()" class="add-to-cart-btn">Add to Cart</button>
+        </div>
+    </div>
+
+    <script>
+        let currentPerfumeId = null;
+        let currentCategory = 'all';
+        
+        // Show loading spinner
+        function showLoading() {
+            document.getElementById('loadingSpinner').style.display = 'flex';
+        }
+        
+        // Hide loading spinner
+        function hideLoading() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+        
+        // Navigate to cart page
+        function navigateToCart() {
+            window.location.href = "{{ url_for('customer_cart') }}";
+        }
+        
+        // Highlight active category button
+        function highlightActiveButton(category) {
+            document.getElementById('allBtn').classList.remove('active');
+            document.getElementById('menBtn').classList.remove('active');
+            document.getElementById('womenBtn').classList.remove('active');
+            document.getElementById('unisexBtn').classList.remove('active');
+            
+            document.getElementById(category + 'Btn').classList.add('active');
+        }
+
+        // Fetch Perfumes from Backend - Updated with correct API endpoints
+function showPerfumes(category = "all") {
+    currentCategory = category;
+    highlightActiveButton(category);
+    showLoading();
+    
+    // Changed from /api/perfumes to /api/customer/perfumes to match backend routes
+    fetch(`/api/customer/perfumes?category=${category}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const perfumeGrid = document.getElementById("perfumeGrid");
+            perfumeGrid.innerHTML = "";
+            
+            if (data.length === 0) {
+                perfumeGrid.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-search" style="font-size: 48px; color: #ccc; margin-bottom: 20px;"></i>
+                        <p>No perfumes found in this category.</p>
+                    </div>
+                `;
+            } else {
+                data.forEach(perfume => {
+                    const perfumeCard = document.createElement("div");
+                    perfumeCard.className = "perfume-card";
+                    
+                    // Create a truncated description
+                    const shortDesc = perfume.description ? 
+                        (perfume.description.length > 80 ? perfume.description.substring(0, 80) + '...' : perfume.description) : 
+                        'No description available';
+                    
+                    // Format the category badge
+                    let categoryDisplay = '';
+                    if (perfume.category === 'men') {
+                        categoryDisplay = 'Men';
+                    } else if (perfume.category === 'women') {
+                        categoryDisplay = 'Women';
+                    } else {
+                        categoryDisplay = 'Unisex';
+                    }
+                    
+                    // Check if perfume has the name field or perfume_name field
+                    const perfumeName = perfume.name || perfume.perfume_name || 'Unnamed Perfume';
+                    
+                    perfumeCard.innerHTML = `
+                        <img src="${perfume.image_url || '/static/default-perfume.png'}" alt="${perfumeName}" 
+                             onerror="this.src='/static/default-perfume.png'">
+                        <div class="category-badge">${categoryDisplay}</div>
+                        <h3>${perfumeName}</h3>
+                        <p>${shortDesc}</p>
+                        <p class="price">$${perfume.price.toFixed(2)}</p>
+                        <button onclick="openModal(${perfume.perfume_id})">View Details</button>
+                    `;
+                    perfumeGrid.appendChild(perfumeCard);
+                });
+            }
+            hideLoading();
+        })
+        .catch(error => {
+            console.error("Error fetching perfumes:", error);
+            const perfumeGrid = document.getElementById("perfumeGrid");
+            perfumeGrid.innerHTML = `
+                <div class="no-results">
+                    <i class="fas fa-exclamation-circle" style="font-size: 48px; color: #d9534f; margin-bottom: 20px;"></i>
+                    <p>Error loading perfumes. Please try again later.</p>
+                </div>
+            `;
+            hideLoading();
+        });
+}
+
+// Open Perfume Modal - Updated with correct API endpoint
+function openModal(perfumeId) {
+    currentPerfumeId = perfumeId;
+    showLoading();
+    
+    // Changed from /api/perfumes/${perfumeId} to /api/customer/perfumes/${perfumeId}
+    fetch(`/api/customer/perfumes/${perfumeId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(perfume => {
+            document.getElementById("modalImage").src = perfume.image_url || '/static/default-perfume.png';
+            document.getElementById("modalImage").onerror = function() {
+                this.src = '/static/default-perfume.png';
+            };
+            // Handle potential field name differences
+            document.getElementById("modalName").textContent = perfume.name || perfume.perfume_name || 'Unnamed Perfume';
+            document.getElementById("modalDescription").textContent = perfume.description || 'No description available';
+            document.getElementById("modalPrice").textContent = `$${perfume.price.toFixed(2)}`;
+            
+            // Format the category badge
+            let categoryDisplay = '';
+            if (perfume.category === 'men') {
+                categoryDisplay = 'Men';
+            } else if (perfume.category === 'women') {
+                categoryDisplay = 'Women';
+            } else {
+                categoryDisplay = 'Unisex';
+            }
+            document.getElementById("modalCategory").textContent = categoryDisplay;
+            
+            document.getElementById("quantity").value = 1;
+            document.getElementById("perfumeModal").style.display = "flex";
+            hideLoading();
+        })
+        .catch(error => {
+            console.error("Error fetching perfume details:", error);
+            hideLoading();
+            alert("Error loading product details. Please try again.");
+        });
+}
+
+// Update Cart Count - Updated with correct API endpoint
+function updateCartCount() {
+    // Changed from /api/cart-count to /api/customer/cart-count
+    fetch(`/api/customer/cart-count`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById("cartCount").textContent = data.count;
+        })
+        .catch(error => console.error("Error updating cart count:", error));
+}
+
+// Add to Cart - Updated with correct API endpoint
+function addToCart() {
+    const quantity = parseInt(document.getElementById("quantity").value);
+    if (quantity < 1) {
+        alert("Please select a valid quantity.");
+        return;
+    }
+    
+    showLoading();
+    
+    // Changed from /api/add-to-cart to /api/customer/add-to-cart
+    fetch('/api/customer/add-to-cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ perfume_id: currentPerfumeId, quantity })
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            hideLoading();
+            closeModal();
+            showSuccessMessage();
+            updateCartCount();
+        })
+        .catch(error => {
+            console.error("Error adding to cart:", error);
+            hideLoading();
+            
+            if (error.message.includes('User not authenticated')) {
+                if (confirm("You need to login to add items to cart. Would you like to login now?")) {
+                    window.location.href = "{{ url_for('customer_home') }}";  // Redirect to home instead of login
+                }
+            } else {
+                alert("Error adding item to cart. Please try again.");
+            }
+        });
+}
+                           
+        
+        // Increment quantity
+        function incrementQuantity() {
+            const quantityInput = document.getElementById("quantity");
+            quantityInput.value = parseInt(quantityInput.value) + 1;
+        }
+        
+        // Decrement quantity
+        function decrementQuantity() {
+            const quantityInput = document.getElementById("quantity");
+            const currentValue = parseInt(quantityInput.value);
+            if (currentValue > 1) {
+                quantityInput.value = currentValue - 1;
+            }
+        }
+
+        // Update Cart Count
+       
+        
+        // Show success message
+        function showSuccessMessage() {
+            const message = document.getElementById("successMessage");
+            message.style.display = "block";
+            
+            setTimeout(function() {
+                message.style.display = "none";
+            }, 3000);
+        }
+
+        // Close Modal
+        function closeModal() {
+            document.getElementById("perfumeModal").style.display = "none";
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById("perfumeModal");
+            if (event.target == modal) {
+                closeModal();
+            }
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            showPerfumes();
+            updateCartCount();
+            
+            // Prevent negative quantities
+            document.getElementById("quantity").addEventListener('change', function() {
+                if (this.value < 1) {
+                    this.value = 1;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

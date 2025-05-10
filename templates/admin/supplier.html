@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplier Management | Scentova Admin</title>
+    <link rel="icon" href="{{ url_for('static', filename='assets/ini.png') }}" type="image/x-icon" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+
+        .dashboard {
+            display: flex;
+        }
+
+        h2 {
+            color: #1e3a8a;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #1e3a8a;
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding: 20px;
+            display: flex;
+            overflow-y: auto;
+            flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .sidebar img {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            margin: 0 auto 20px;
+            display: block;
+            border-radius: 10px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar ul li {
+            margin: 0;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 12px 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar ul li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .sidebar ul li a i {
+            font-size: 18px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .sidebar-footer p {
+            margin: 0;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            margin-left: 300px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            color: #1e3a8a;
+        }
+
+        .quick-actions button {
+            background-color: #1e3a8a;
+            color: white;
+            border: none;
+            font-size: 15px;
+            font-weight: bold;
+            padding: 10px 20px;
+            margin-right: 40px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .quick-actions button:hover {
+            background-color: white;
+            color: #1e3a8a;
+            border: 3px solid #1e3a8a;
+
+        }
+
+        /* Supplier Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table th, table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #f4f7f9;
+        }
+
+        /* Forms and Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 90%;
+            padding: 10px;
+            border: 2px solid #004080;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            height: 100px;
+        }
+
+        /* Buttons */
+        .btn {
+            background-color: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .btn:hover {
+            background-color: #1c3d73;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                margin-bottom: 20px;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .dashboard {
+                flex-direction: column;
+            }
+
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+
+            table th {
+                position: absolute;
+                background-color: #1e3a8a;
+                color: white;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            table tr {
+                border: 1px solid #ddd;
+                margin-bottom: 10px;
+            }
+
+            table td {
+                border: none;
+                position: relative;
+                padding-left: 50%;
+            }
+
+            table td:before {
+                position: absolute;
+                top: 12px;
+                left: 12px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                content: attr(data-label);
+                font-weight: bold;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>SCENTOVA</h2>
+            <img src="{{ url_for('static', filename='assets/scent-logo-new.png') }}" alt="Scentova Logo">
+            <ul>
+                <li><a href="{{ url_for('admin_dashboard') }}" class="active"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
+                <li><a href="{{ url_for('admin_manage_perfume') }}"><i class="fas fa-cogs"></i>Manage Perfumes</a></li>
+                <li><a href="{{ url_for('admin_order') }}"><i class="fas fa-shopping-cart"></i>Orders</a></li>
+                <li><a href="{{ url_for('admin_customer') }}"><i class="fas fa-users"></i>Customers</a></li>
+                <li><a href="{{ url_for('admin_supplier') }}"><i class="fas fa-users"></i>Supplier</a></li>
+                <li><a href="{{ url_for('admin_analytics') }}"><i class="fas fa-chart-line"></i>Analytics</a></li>
+                <li><a href="{{ url_for('admin_inventory') }}"><i class="fas fa-boxes"></i>Inventory</a></li>
+                <li><a href="{{ url_for('admin_discounts') }}"><i class="fas fa-tags"></i>Discounts & Offers</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i>Logout</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <p>© 2024 Scentova</p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header>
+                <h1>Supplier Management</h1>
+                <div class="quick-actions">
+                    <button onclick="openAddSupplierModal()"><i class="fas fa-plus"></i> Add Supplier</button>
+                </div>
+            </header>
+
+            <!-- Supplier Table -->
+            <div class="supplier-table">
+                <h2>All Suppliers</h2>
+                <table id="supplierTable">
+                    <thead>
+                        <tr>
+                            <th>Supplier Id</th>
+                            <th>Supplier Name</th>
+                            <th>Contact</th>
+                            <th>Pending Payments</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="supplierTableBody"></tbody>
+
+                </table>
+            </div>
+
+            <!-- Add Supplier Modal -->
+            <div id="addSupplierModal" class="modal">
+                <div class="modal-content">
+                    <h2>Add New Supplier</h2>
+                    <form id="addSupplierForm">
+                        <div class="form-group">
+                            <label for="supplierId">Supplier Id</label>
+                            <input type="number" id="supplierId" name="supplierId" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="supplierName">Supplier Name</label>
+                            <input type="text" id="supplierName" name="supplierName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="supplierContact">Contact</label>
+                            <input type="text" id="supplierContact" name="supplierContact" required 
+                                pattern="[0-9]{10}" maxlength="10" oninput="validateContact(this)">
+                            <small style="color: red;" id="contactError"></small>
+                        </div>
+                        <div class="form-group">
+                            <label for="pendingPayments">Pending Payments</label>
+                            <input type="text" id="pendingPayments" name="pendingPayments" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status" name="status" required>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn">Add Supplier</button>
+                        <button type="button" class="btn" onclick="closeAddSupplierModal()">Cancel</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Edit Supplier Modal -->
+            <div id="editSupplierModal" class="modal">
+                <div class="modal-content">
+                    <h2>Edit Supplier</h2>
+                    <form id="editSupplierForm">
+                        <div class="form-group">
+                            <label for="editSupplierId">Supplier Id</label>
+                            <input type="number" id="editSupplierId" name="editSupplierId" required pattern="[0-9]{1,3}" 
+                            maxlength="5">
+                        </div>
+                        <div class="form-group">
+                            <label for="editSupplierName">Supplier Name</label>
+                            <input type="text" id="editSupplierName" name="editSupplierName" required minlength="3">
+                            <small id="nameError" style="color: red;"></small>
+                        </div>
+                        <div class="form-group">
+                            <label for="editSupplierContact">Contact Number</label>
+                            <input type="number" id="editSupplierContact" name="editSupplierContact" required pattern="[0-9]{10}" 
+                            maxlength="10">
+                            <small id="contactError" style="color: red;"></small>
+                        </div>
+                        <div class="form-group">
+                            <label for="editPendingPayments">Pending Payments</label>
+                            <input type="text" id="editPendingPayments" name="editPendingPayments" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editStatus">Status</label>
+                            <select id="editStatus" name="editStatus" required>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn">Save Changes</button>
+                        <button type="button" class="btn" onclick="closeEditSupplierModal()">Cancel</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("addSupplierForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            let supplierData = {
+                supplier_id: document.getElementById("supplierId").value,
+                supplier_name: document.getElementById("supplierName").value,
+                contact: document.getElementById("supplierContact").value,
+                pending_payment: document.getElementById("pendingPayments").value,
+                status: document.getElementById("status").value
+            };
+
+            fetch("http://127.0.0.1:5000/add_supplier", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(supplierData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                fetchSuppliers();
+                closeAddSupplierModal();
+            })
+            .catch(error => console.error("Error adding supplier:", error));
+        });
+
+        function validateName(input) {
+            let error = document.getElementById("nameError");
+            if (input.value.length < 3) {
+                error.textContent = "Name must be at least 3 characters long.";
+                input.setCustomValidity("Invalid Name");
+            } else {
+                error.textContent = "";
+                input.setCustomValidity("");
+            }
+        }
+
+        function validateContact(input) {
+            let error = document.getElementById("contactError");
+            let pattern = /^[0-9]{10}$/;
+            if (!pattern.test(input.value)) {
+                error.textContent = "Contact number must be exactly 10 digits.";
+                input.setCustomValidity("Invalid Contact Number");
+            } else {
+                error.textContent = "";
+                input.setCustomValidity("");
+            }
+        }
+
+        
+
+        function validateAddress(input) {
+            let error = document.getElementById("addressError");
+            if (input.value.length < 10) {
+                error.textContent = "Address must be at least 10 characters long.";
+                input.setCustomValidity("Invalid Address");
+            } else {
+                error.textContent = "";
+                input.setCustomValidity("");
+            }
+        }
+
+
+        
+
+        // Render supplier table
+        
+        function fetchSuppliers() {
+            fetch('http://127.0.0.1:5000/get_supplier')
+            .then(response => response.json())
+            .then(data => {
+                let tableBody = document.getElementById('supplierTableBody');
+                tableBody.innerHTML = '';
+
+                data.forEach(supplier => {
+                    let row = `<tr>
+                        <td>${supplier.supplier_id}</td>
+                        <td>${supplier.supplier_name}</td>
+                        <td>${supplier.contact}</td>
+                        <td>${supplier.pending_payment}</td>
+                        <td>${supplier.status}</td>
+                        <td>
+                            <button class="btn edit-btn" onclick="editSupplier(${supplier.supplier_id})">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn delete-btn" onclick="deleteSupplier(${supplier.supplier_id})">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            })
+            .catch(error => console.error('Error fetching suppliers:', error));
+        }
+
+        function editSupplier(supplierId) {
+            fetch(`http://127.0.0.1:5000/get_supplier/${supplierId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error("Error:", data.error);
+                    alert("Supplier not found!");
+                    return;
+                }
+
+                document.getElementById("editSupplierId").value = data.supplier_id;
+                document.getElementById("editSupplierName").value = data.supplier_name;
+                document.getElementById("editSupplierContact").value = data.contact;
+                document.getElementById("editPendingPayments").value = data.pending_payment;
+                document.getElementById("editStatus").value = data.status;
+
+                document.getElementById("editSupplierModal").style.display = "flex";
+            })
+            .catch(error => console.error("Error fetching supplier details:", error));
+        }
+
+        document.getElementById("editSupplierForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            let supplierData = {
+                supplier_name: document.getElementById("editSupplierName").value,
+                contact: document.getElementById("editSupplierContact").value,
+                pending_payment: document.getElementById("editPendingPayments").value,
+                status: document.getElementById("editStatus").value
+            };
+
+            let supplierId = document.getElementById("editSupplierId").value;
+
+            fetch(`http://127.0.0.1:5000/edit_supplier/${supplierId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(supplierData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message || "Error updating supplier");
+                fetchSuppliers();
+                closeEditSupplierModal();
+            })
+            .catch(error => console.error("Error updating supplier:", error));
+        });
+
+
+        function deleteSupplier(id) {
+            if (confirm("Are you sure you want to delete this supplier?")) {
+                fetch(`http://127.0.0.1:5000/delete_supplier/${id}`, {
+                    method: "DELETE"
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    fetchSuppliers();
+                })
+                .catch(error => console.error("Error deleting supplier:", error));
+            }
+        }
+
+
+        window.onload = fetchSuppliers;   
+
+        // Modal control functions
+        function openAddSupplierModal() {
+            document.getElementById("addSupplierModal").style.display = "flex";
+        }
+        function closeAddSupplierModal() {
+            document.getElementById("addSupplierModal").style.display = "none";
+        }
+        function closeEditSupplierModal(){
+            document.getElementById("editSupplierModal").style.display = "none";
+        }
+    </script>
+</body>
+</html>

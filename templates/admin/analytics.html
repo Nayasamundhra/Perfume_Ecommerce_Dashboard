@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics & Reports | Scentova Admin</title>
+    <link rel="icon" href="ini.png" type="image/x-icon" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script>
+        async function fetchSalesData() {
+            try {
+                const response = await fetch('/sales_data');
+                const data = await response.json();
+
+                if (data.error) {
+                    console.error("Error fetching data:", data.error);
+                    return;
+                }
+
+                const months = data.map(item => item.month_name);
+                const sales = data.map(item => item.sales_amount);
+
+                renderChart(months, sales);
+            } catch (error) {
+                console.error("Error fetching sales data:", error);
+            }
+        }
+
+        function renderChart(months, sales) {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Sales Amount',
+                        data: sales,
+                        borderColor: 'blue',
+                        backgroundColor: 'rgba(0, 0, 255, 0.2)',
+                        borderWidth: 2,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // Fetch data and render chart when page loads
+        fetchSalesData();
+    </script>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+
+        .dashboard {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #1e3a8a;
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding: 20px;
+            display: flex;
+            overflow-y: auto;
+            flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .sidebar img {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            margin: 0 auto 20px;
+            display: block;
+            border-radius: 10px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar ul li {
+            margin: 0;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 12px 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar ul li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .sidebar ul li a i {
+            font-size: 18px;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            margin-left: 300px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            color: #1e3a8a;
+        }
+
+        .quick-actions button {
+            background-color: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-left: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .quick-actions button:hover {
+            background-color: #1c3d73;
+        }
+
+        .graphical-insights {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+
+        .graphical-insights .chart {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            height: 400px; /* Fixed height for consistency */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .graphical-insights .chart h3 {
+            margin: 19px 0 10px 0;
+            font-size: 23px;
+            color: #1e3a8a;
+        }
+
+        .graphical-insights canvas {
+            width: 95% !important;
+            height: 95% !important;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .sidebar-footer p {
+            margin: 0;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar (Same as Reference Code) -->
+        <div class="sidebar">
+            <h2>SCENTOVA</h2>
+            <img src="{{ url_for('static', filename='assets/scent-logo-new.png') }}" alt="Scentova Logo">
+            <ul>
+                <li><a href="{{ url_for('admin_dashboard') }}" class="active"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
+                <li><a href="{{ url_for('admin_manage_perfume') }}"><i class="fas fa-cogs"></i>Manage Perfumes</a></li>
+                <li><a href="{{ url_for('admin_order') }}"><i class="fas fa-shopping-cart"></i>Orders</a></li>
+                <li><a href="{{ url_for('admin_customer') }}"><i class="fas fa-users"></i>Customers</a></li>
+                <li><a href="{{ url_for('admin_supplier') }}"><i class="fas fa-users"></i>Supplier</a></li>
+                <li><a href="{{ url_for('admin_analytics') }}"><i class="fas fa-chart-line"></i>Analytics</a></li>
+                <li><a href="{{ url_for('admin_inventory') }}"><i class="fas fa-boxes"></i>Inventory</a></li>
+                <li><a href="{{ url_for('admin_discounts') }}"><i class="fas fa-tags"></i>Discounts & Offers</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i>Logout</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <p>© 2024 Scentova</p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header>
+                <h1>Analytics & Reports</h1>
+                <div class="quick-actions">
+                    <button id="generateReport">Generate Report</button>
+                </div>
+            </header>
+
+            <!-- Graphical Insights -->
+            <div class="graphical-insights">
+                <!-- Chart 1: Sales Trends -->
+                <div class="chart">
+                    <h3>Sales Trends</h3>
+                    <canvas id="salesChart"></canvas>
+                </div>
+
+                <!-- Chart 2: Top-Performing Products -->
+                <div class="chart">
+                    <h3>Top-Performing Products</h3>
+                    <canvas id="topProducts"></canvas>
+                </div>
+
+                <!-- Chart 3: Customer Segments -->
+                <div class="chart">
+                    <h3>Customer Segments</h3>
+                    <canvas id="customerSegments"></canvas>
+                </div>
+
+                <!-- Chart 4: Stock Trends -->
+                <div class="chart">
+                    <h3>Stock Trends</h3>
+                    <canvas id="stockTrends"></canvas>
+                </div>
+
+                <!-- Chart 5: Product Performance -->
+                <div class="chart">
+                    <h3>Product Performance</h3>
+                    <canvas id="productPerformance"></canvas>
+                </div>
+
+                <!-- Chart 6: Customer Feedback Trends -->
+                <div class="chart">
+                    <h3>Customer Feedback Trends</h3>
+                    <canvas id="feedbackTrends"></canvas>
+                </div>
+
+                <!-- Chart 7: Monthly Revenue -->
+                <div class="chart">
+                    <h3>Monthly Revenue</h3>
+                    <canvas id="monthlyRevenue"></canvas>
+                </div>
+
+                <!-- Chart 8: Order Fulfillment Rate -->
+                <div class="chart">
+                    <h3>Order Fulfillment Rate</h3>
+                    <canvas id="orderFulfillment"></canvas>
+                </div>
+
+                <!-- Chart 9: Customer Retention Rate -->
+                <div class="chart">
+                    <h3>Customer Retention Rate</h3>
+                    <canvas id="customerRetention"></canvas>
+                </div>
+
+                <!-- Chart 10: Product Return Rate -->
+                <div class="chart">
+                    <h3>Product Return Rate</h3>
+                    <canvas id="productReturnRate"></canvas>
+                </div>
+
+                <!-- Chart 11: Customer Lifetime Value -->
+                <div class="chart">
+                    <h3>Customer Lifetime Value</h3>
+                    <canvas id="customerLifetimeValue"></canvas>
+                </div>
+
+                <!-- Chart 12: Marketing Campaign Performance -->
+                <div class="chart">
+                    <h3>Marketing Campaign Performance</h3>
+                    <canvas id="marketingCampaign"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chart.js Implementation for 12 Charts
+        const chartConfigs = [
+            
+            { id: 'topProducts', type: 'bar', labels: ['Chanel No. 5', 'Dior Sauvage', 'Gucci Bloom', 'YSL Black Opium'], data: [120, 90, 70, 50], label: 'Sales' },
+            { id: 'customerSegments', type: 'pie', labels: ['Male', 'Female', 'Other'], data: [60, 35, 5], label: 'Customers' },
+            { id: 'stockTrends', type: 'line', labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], data: [100, 80, 60, 40, 20, 10], label: 'Stock' },
+            { id: 'productPerformance', type: 'bar', labels: ['Chanel No. 5', 'Dior Sauvage', 'Gucci Bloom', 'YSL Black Opium'], data: [120, 90, 70, 50], label: 'Sales' },
+            { id: 'feedbackTrends', type: 'line', labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], data: [5, 4, 3, 2, 1, 0], label: 'Feedback' },
+            { id: 'monthlyRevenue', type: 'line', labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], data: [5000, 6000, 7000, 8000, 9000, 10000], label: 'Revenue' },
+            { id: 'orderFulfillment', type: 'bar', labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], data: [95, 90, 85, 80, 75, 70], label: 'Fulfillment Rate' },
+            { id: 'customerRetention', type: 'line', labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], data: [80, 85, 90, 88, 92, 95], label: 'Retention Rate' },
+            { id: 'productReturnRate', type: 'bar', labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], data: [5, 4, 3, 2, 1, 0], label: 'Return Rate' },
+            { id: 'customerLifetimeValue', type: 'line', labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], data: [500, 600, 700, 800, 900, 1000], label: 'Lifetime Value' },
+            { id: 'marketingCampaign', type: 'bar', labels: ['Bill Board', 'Influencer Marketing', 'Local Campaign', 'Ads'], data: [200, 300, 400, 500], label: 'Performance' },
+        ];
+
+        chartConfigs.forEach(config => {
+            const ctx = document.getElementById(config.id).getContext('2d');
+            new Chart(ctx, {
+                type: config.type,
+                data: {
+                    labels: config.labels,
+                    datasets: [{
+                        label: config.label,
+                        data: config.data,
+                        backgroundColor: config.type === 'pie' ? ['#1e3a8a', '#3b82f6', '#93c5fd'] : '#1e3a8a',
+                        borderColor: config.type === 'line' ? '#1e3a8a' : undefined,
+                        fill: config.type === 'line' ? false : undefined,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: config.type === 'pie',
+                            position: 'bottom',
+                        },
+                    },
+                },
+            });
+        });
+
+        // Generate Report Functionality
+        document.getElementById('generateReport').addEventListener('click', function () {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4'); // Create a new PDF in portrait mode
+            const charts = document.querySelectorAll('.chart canvas'); // Get all chart canvases
+
+            let topMargin = 20; // Top margin for the first chart
+            const pageHeight = doc.internal.pageSize.getHeight(); // Get PDF page height
+
+            // Function to add a chart image to the PDF
+            const addChartToPDF = (chart, index) => {
+                return new Promise((resolve) => {
+                    html2canvas(chart).then((canvas) => {
+                        const imgData = canvas.toDataURL('image/png'); // Convert canvas to image
+                        const imgWidth = 180; // Image width in the PDF
+                        const imgHeight = (canvas.height * imgWidth) / canvas.width; // Maintain aspect ratio
+
+                        // Add a new page if the chart doesn't fit on the current page
+                        if (topMargin + imgHeight > pageHeight - 20) {
+                            doc.addPage();
+                            topMargin = 20; // Reset top margin for the new page
+                        }
+
+                        // Add the chart image to the PDF
+                        doc.addImage(imgData, 'PNG', 15, topMargin, imgWidth, imgHeight);
+                        topMargin += imgHeight + 10; // Update top margin for the next chart
+
+                        resolve();
+                    });
+                });
+            };
+
+            // Add all charts to the PDF sequentially
+            const addCharts = async () => {
+                for (let i = 0; i < charts.length; i++) {
+                    await addChartToPDF(charts[i], i);
+                }
+                doc.save('Scentova_Analytics_Report.pdf'); // Save the PDF
+            };
+
+            addCharts();
+        });
+    </script>
+</body>
+</html>

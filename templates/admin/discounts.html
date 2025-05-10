@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discounts & Offers | Scentova Admin</title>
+    <link rel="icon" href="ini.png" type="image/x-icon" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+
+        .dashboard {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #1e3a8a;
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding: 20px;
+            display: flex;
+            overflow-y: auto;
+            flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .sidebar img {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            margin: 0 auto 20px;
+            display: block;
+            border-radius: 10px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar ul li {
+            margin: 0;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 12px 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar ul li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .sidebar ul li a i {
+            font-size: 18px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .sidebar-footer p {
+            margin: 0;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            margin-left: 300px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            color: #1e3a8a;
+        }
+
+        .quick-actions button {
+            background-color: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-left: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .quick-actions button:hover {
+            background-color: #1c3d73;
+        }
+
+        /* Discounts Table */
+        .discounts-table {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .discounts-table h2 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+        }
+
+        .discounts-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .discounts-table th,
+        .discounts-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .discounts-table th {
+            background-color: #1e3a8a;
+            color: white;
+        }
+
+        .discounts-table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .discounts-table .active {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .discounts-table .expired {
+            color: #c62828;
+            font-weight: bold;
+        }
+
+        .discounts-table .actions button {
+            background-color: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        .discounts-table .actions button:hover {
+            background-color: #1c3d73;
+        }
+
+        /* Add Discount Form */
+        .add-discount-form {
+            display: none;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .add-discount-form h2 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+        }
+
+        .add-discount-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .add-discount-form input,
+        .add-discount-form select {
+            width: 95%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .add-discount-form button {
+            background-color: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .add-discount-form button:hover {
+            background-color: #1c3d73;
+        }
+
+        .add-discount-form .error {
+            color: #c62828;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        /* Discount Analytics */
+        .discount-analytics {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .discount-analytics h2 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+        }
+
+        .discount-analytics .chart {
+            width: 100%;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="sidebar">
+            <h2>SCENTOVA</h2>
+            <img src="{{ url_for('static', filename='assets/scent-logo-new.png') }}" alt="Scentova Logo">
+            <ul>
+                <li><a href="{{ url_for('admin_dashboard') }}" class="active"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
+                <li><a href="{{ url_for('admin_manage_perfume') }}"><i class="fas fa-cogs"></i>Manage Perfumes</a></li>
+                <li><a href="{{ url_for('admin_order') }}"><i class="fas fa-shopping-cart"></i>Orders</a></li>
+                <li><a href="{{ url_for('admin_customer') }}"><i class="fas fa-users"></i>Customers</a></li>
+                <li><a href="{{ url_for('admin_supplier') }}"><i class="fas fa-users"></i>Supplier</a></li>
+                <li><a href="{{ url_for('admin_analytics') }}"><i class="fas fa-chart-line"></i>Analytics</a></li>
+                <li><a href="{{ url_for('admin_inventory') }}"><i class="fas fa-boxes"></i>Inventory</a></li>
+                <li><a href="{{ url_for('admin_discounts') }}"><i class="fas fa-tags"></i>Discounts & Offers</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i>Logout</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <p>© 2024 Scentova</p>
+            </div>
+        </div>
+        <div class="main-content">
+            <header>
+                <h1>Discounts & Offers</h1>
+                <div class="quick-actions">
+                    <button id="addDiscount">Add Discount</button>
+                </div>
+            </header>
+
+            <!-- Add Discount Form -->
+            <div class="add-discount-form" id="addDiscountForm">
+                <h2>Add New Discount</h2>
+                <form id="discountForm">
+                    <label for="discountCode">Discount Code</label>
+                    <input type="text" id="discountCode" name="discountCode" required>
+                    <div class="error" id="discountCodeError"></div>
+
+                    <label for="discountType">Discount Type</label>
+                    <select id="discountType" name="discountType" required>
+                        <option value="percentage">Percentage</option>
+                        <option value="fixed">Fixed Amount</option>
+                    </select>
+                    <div class="error" id="discountTypeError"></div>
+
+                    <label for="discountValue">Discount Value</label>
+                    <input type="number" id="discountValue" name="discountValue" required>
+                    <div class="error" id="discountValueError"></div>
+
+                    <label for="customerSegment">Customer Segment</label>
+                    <select id="customerSegment" name="customerSegment" required>
+                        <option value="all">All Customers</option>
+                        <option value="new">New Customers</option>
+                        <option value="loyal">Loyal Customers</option>
+                    </select>
+                    <div class="error" id="customerSegmentError"></div>
+
+                    <label for="expiryDate">Expiry Date</label>
+                    <input type="date" id="expiryDate" name="expiryDate" required>
+                    <div class="error" id="expiryDateError"></div>
+
+                    <button type="submit">Add Discount</button>
+                </form>
+            </div>
+
+            <!-- Discounts Table -->
+            <div class="discounts-table">
+                <h2>Current Discounts</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Type</th>
+                            <th>Value</th>
+                            <th>Customer Segment</th>
+                            <th>Expiry Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="discountsTableBody">
+                        <!-- Dynamic rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Discount Analytics -->
+            <div class="discount-analytics">
+                <h2>Discount Analytics</h2>
+                <div class="chart">
+                    <canvas id="discountUsageChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample Data
+        let discountsData = [
+            { code: 'WELCOME10', type: 'percentage', value: 10, segment: 'new', expiry: '2024-12-31', status: 'active' },
+            { code: 'LOYAL20', type: 'percentage', value: 20, segment: 'loyal', expiry: '2024-11-30', status: 'active' },
+            { code: 'FIXED5', type: 'fixed', value: 5, segment: 'all', expiry: '2024-10-31', status: 'expired' },
+        ];
+
+        // Function to update the discounts table
+        function updateDiscountsTable() {
+            const tableBody = document.getElementById('discountsTableBody');
+            tableBody.innerHTML = '';
+
+            discountsData.forEach(discount => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${discount.code}</td>
+                    <td>${discount.type}</td>
+                    <td>${discount.type === 'percentage' ? `${discount.value}%` : `$${discount.value}`}</td>
+                    <td>${discount.segment === 'all' ? 'All Customers' : discount.segment === 'new' ? 'New Customers' : 'Loyal Customers'}</td>
+                    <td>${discount.expiry}</td>
+                    <td class="${discount.status === 'active' ? 'active' : 'expired'}">${discount.status}</td>
+                    <td class="actions">
+                        <button onclick="editDiscount('${discount.code}')">Edit</button>
+                        <button onclick="deleteDiscount('${discount.code}')">Delete</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Function to add a new discount
+        // Track the index of the currently edited discount
+        let editingDiscountIndex = -1;
+
+        // Function to add or update a discount
+        function addDiscount(event) {
+            event.preventDefault();
+
+            const code = document.getElementById('discountCode').value.trim();
+            const type = document.getElementById('discountType').value;
+            const value = parseInt(document.getElementById('discountValue').value);
+            const segment = document.getElementById('customerSegment').value;
+            const expiry = document.getElementById('expiryDate').value;
+
+            // Validation
+            let isValid = true;
+
+            if (!code) {
+                document.getElementById('discountCodeError').textContent = 'Discount code is required.';
+                isValid = false;
+            } else {
+                document.getElementById('discountCodeError').textContent = '';
+            }
+
+            if (isNaN(value) || value <= 0) {
+                document.getElementById('discountValueError').textContent = 'Discount value must be a positive number.';
+                isValid = false;
+            } else {
+                document.getElementById('discountValueError').textContent = '';
+            }
+
+            if (!expiry) {
+                document.getElementById('expiryDateError').textContent = 'Expiry date is required.';
+                isValid = false;
+            } else {
+                document.getElementById('expiryDateError').textContent = '';
+            }
+
+            if (isValid) {
+                if (editingDiscountIndex !== -1) {
+                    // Update existing discount
+                    discountsData[editingDiscountIndex] = { code, type, value, segment, expiry, status: 'active' };
+                    editingDiscountIndex = -1; // Reset editing flag
+                } else {
+                    // Add new discount
+                    discountsData.push({ code, type, value, segment, expiry, status: 'active' });
+                }
+
+                updateDiscountsTable();
+                updateDiscountAnalytics();
+
+                // Reset form
+                document.getElementById('discountForm').reset();
+                document.getElementById('addDiscountForm').style.display = 'none';
+            }
+        }
+
+        // Function to edit a discount
+        function editDiscount(code) {
+            const index = discountsData.findIndex(d => d.code === code);
+            if (index !== -1) {
+                const discount = discountsData[index];
+
+                document.getElementById('discountCode').value = discount.code;
+                document.getElementById('discountType').value = discount.type;
+                document.getElementById('discountValue').value = discount.value;
+                document.getElementById('customerSegment').value = discount.segment;
+                document.getElementById('expiryDate').value = discount.expiry;
+                document.getElementById('addDiscountForm').style.display = 'block';
+
+                editingDiscountIndex = index; // Store the index of the discount being edited
+            }
+        }
+
+
+        // Function to delete a discount
+        function deleteDiscount(code) {
+            const index = discountsData.findIndex(d => d.code === code);
+            if (index !== -1) {
+                discountsData.splice(index, 1); // Remove only the selected discount
+            }
+            updateDiscountsTable();
+            updateDiscountAnalytics();
+        }
+        
+        // Function to update discount analytics
+        function updateDiscountAnalytics() {
+            const activeDiscounts = discountsData.filter(d => d.status === 'active').length;
+            const expiredDiscounts = discountsData.filter(d => d.status === 'expired').length;
+
+            discountUsageChart.data.datasets[0].data = [activeDiscounts, expiredDiscounts];
+            discountUsageChart.update();
+        }
+
+        // Show Add Discount Form
+        document.getElementById('addDiscount').addEventListener('click', function() {
+            document.getElementById('addDiscountForm').style.display = 'block';
+        });
+
+        // Handle Form Submission
+        document.getElementById('discountForm').addEventListener('submit', addDiscount);
+
+        // Discount Usage Chart
+        const discountUsageCtx = document.getElementById('discountUsageChart').getContext('2d');
+        const discountUsageChart = new Chart(discountUsageCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Active Discounts', 'Expired Discounts'],
+                datasets: [{
+                    data: [2, 1], // Initial data
+                    backgroundColor: ['#1e3a8a', '#c62828'],
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                },
+            },
+        });
+
+        // Initial update
+        updateDiscountsTable();
+        updateDiscountAnalytics();
+    </script>
+</body>
+</html>
